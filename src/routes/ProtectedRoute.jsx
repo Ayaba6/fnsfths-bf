@@ -8,30 +8,21 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   const [allowed, setAllowed] = useState(false)
 
   useEffect(() => {
-    const checkRole = async () => {
+    const check = async () => {
       const { data } = await supabase.auth.getUser()
 
-      if (!data.user) {
-        setAllowed(false)
-        setLoading(false)
-        return
-      }
+      if (!data.user) return setLoading(false)
 
       const { data: roleData } = await getUserRole(data.user.id)
 
-      const role = roleData?.role ?? null
+      const role = roleData?.role
 
-      if (allowedRoles.includes(role)) {
-        setAllowed(true)
-      } else {
-        setAllowed(false)
-      }
-
+      setAllowed(allowedRoles.includes(role))
       setLoading(false)
     }
 
-    checkRole()
-  }, [allowedRoles])
+    check()
+  }, [])
 
   if (loading) return <p>Chargement...</p>
 

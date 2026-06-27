@@ -9,7 +9,13 @@ import PraticiensPage from "../pages/admin/PraticiensPage"
 import ReseauxPage from "../pages/admin/ReseauxPage"
 import AssociationsPage from "../pages/admin/AssociationsPage"
 
-// 🆕 CARTES FNSTHS
+// 🔥 RESEAUX
+import ReseauDashboard from "../pages/reseau/ReseauDashboard"
+
+// 🔥 ASSOCIATIONS
+import AssociationDashboard from "../pages/association/AssociationDashboard"
+
+// CARTE
 import CarteList from "../pages/praticiens/CarteList"
 import CartePDF from "../pages/praticiens/CartePDF"
 
@@ -18,10 +24,10 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
 
-        {/* ================= AUTH ================= */}
+        {/* ================= LOGIN ================= */}
         <Route path="/" element={<Login />} />
 
-        {/* ================= ADMIN DASHBOARD ================= */}
+        {/* ================= ADMIN ================= */}
         <Route
           path="/admin"
           element={
@@ -33,7 +39,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ================= PRATICIENS ================= */}
         <Route
           path="/admin/praticiens"
           element={
@@ -45,7 +50,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ================= RESEAUX ================= */}
         <Route
           path="/admin/reseaux"
           element={
@@ -57,7 +61,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ================= ASSOCIATIONS ================= */}
         <Route
           path="/admin/associations"
           element={
@@ -69,9 +72,31 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ================= CARTES FNSTHS ================= */}
+        {/* ================= RESEAU ================= */}
+        <Route
+          path="/reseau"
+          element={
+            <ProtectedRoute allowedRoles={["reseau"]}>
+              <Layout>
+                <ReseauDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* LISTE DES CARTES */}
+        {/* ================= ASSOCIATION ================= */}
+        <Route
+          path="/association"
+          element={
+            <ProtectedRoute allowedRoles={["association"]}>
+              <Layout>
+                <AssociationDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= CARTES ================= */}
         <Route
           path="/admin/praticiens/carte"
           element={
@@ -83,7 +108,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* CARTE INDIVIDUELLE (PDF + EXPORT) */}
         <Route
           path="/admin/praticiens/carte/:id"
           element={
