@@ -4,10 +4,11 @@ import Login from "../pages/auth/Login"
 import ProtectedRoute from "./ProtectedRoute"
 import Layout from "../components/layout/Layout"
 
+// 🔥 ADMIN & MUTUALISÉS (ADMIN / RESEAU / ASSOCIATION)
 import AdminDashboard from "../pages/admin/AdminDashboard"
-import PraticiensPage from "../pages/admin/PraticiensPage"
+import PraticiensPage from "../pages/admin/PraticiensPage"       // 👈 Mutualisé Admin, Réseau, Association
+import AssociationsPage from "../pages/admin/AssociationsPage" // 👈 Mutualisé Admin et Réseau
 import ReseauxPage from "../pages/admin/ReseauxPage"
-import AssociationsPage from "../pages/admin/AssociationsPage"
 
 // 🔥 RESEAUX
 import ReseauDashboard from "../pages/reseau/ReseauDashboard"
@@ -84,6 +85,30 @@ export default function AppRoutes() {
           }
         />
 
+        {/* ✅ ROUTE RÉSEAU PRATICIENS DYNAMIQUE */}
+        <Route
+          path="/reseau/praticiens"
+          element={
+            <ProtectedRoute allowedRoles={["reseau"]}>
+              <Layout>
+                <PraticiensPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ ROUTE RÉSEAU ASSOCIATIONS MUTUALISÉE */}
+        <Route
+          path="/reseau/associations"
+          element={
+            <ProtectedRoute allowedRoles={["reseau"]}>
+              <Layout>
+                <AssociationsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* ================= ASSOCIATION ================= */}
         <Route
           path="/association"
@@ -91,6 +116,18 @@ export default function AppRoutes() {
             <ProtectedRoute allowedRoles={["association"]}>
               <Layout>
                 <AssociationDashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ ROUTE ASSOCIATION PRATICIENS DYNAMIQUE */}
+        <Route
+          path="/association/praticiens"
+          element={
+            <ProtectedRoute allowedRoles={["association"]}>
+              <Layout>
+                <PraticiensPage />
               </Layout>
             </ProtectedRoute>
           }

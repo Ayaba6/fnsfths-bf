@@ -8,12 +8,18 @@ import {
   CheckCircle,
   XCircle,
   Building2,
-  Loader2
+  Loader2,
+  Plus,
+  X
 } from "lucide-react"
+
+/* ✅ IMPORT DU MODAL DE CRÉATION */
+import PraticienForm from "../../components/modal/PraticienForm"
 
 export default function AssociationDashboard() {
   const [loading, setLoading] = useState(true)
   const [transmitting, setTransmitting] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [stats, setStats] = useState({
     praticiens: 0,
@@ -26,14 +32,20 @@ export default function AssociationDashboard() {
   const [praticiens, setPraticiens] = useState([])
   const [associationId, setAssociationId] = useState(null)
 
+  /* ================= LOCK SCROLL ================= */
+  useEffect(() => {
+    document.body.style.overflow = isModalOpen ? "hidden" : "auto"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [isModalOpen])
+
   const fetchData = async () => {
     setLoading(true)
     try {
-      // 1. Récupérer l'utilisateur connecté
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Utilisateur non connecté")
 
-      // 2. Récupérer l'organisation_id (association_id) depuis la table users
       const { data: profile, error: profileError } = await supabase
         .from("users")
         .select("organisation_id")
@@ -46,11 +58,10 @@ export default function AssociationDashboard() {
 
       if (!orgId) {
         setPraticiens([])
-        setStats({ praticiens: 0, enAttente: 0, transmis: 0, certifies: 0, rejestes: 0 })
+        setStats({ praticiens: 0, enAttente: 0, transmis: 0, certifies: 0, rejetes: 0 })
         return
       }
 
-      // 3. 🔥 RECUPERATION DIRECTE DES STATS ET MEMBRES DEPUIS LA TABLE PRATICIENS
       const { data: praticiensData, error: praticiensError } = await supabase
         .from("praticiens")
         .select("*")
@@ -62,7 +73,6 @@ export default function AssociationDashboard() {
       const list = praticiensData || []
       setPraticiens(list)
 
-      // 4. Calcul des statistiques à partir des lignes récupérées
       setStats({
         praticiens: list.length,
         enAttente: list.filter(p => p.statut === "en_attente").length,
@@ -82,7 +92,6 @@ export default function AssociationDashboard() {
     fetchData()
   }, [])
 
-  // Action pour envoyer tous les dossiers d'un coup
   const handleTransmettreFédération = async () => {
     const praticiensAEnvoyer = praticiens.filter(p => p.statut === "en_attente")
     if (praticiensAEnvoyer.length === 0) return
@@ -118,7 +127,7 @@ export default function AssociationDashboard() {
   return (
     <div className="p-6 bg-gray-50/50 min-h-screen space-y-6 max-w-7xl mx-auto">
 
-      {/* HEADER & TOP ACTION BUTTON */}
+      {/* HEADER & TOP ACTIONS */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-gray-100 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
@@ -130,21 +139,33 @@ export default function AssociationDashboard() {
           </p>
         </div>
 
-        {/* BOUTON TRANSMETTRE PLACÉ EN HAUT */}
-        {stats.enAttente > 0 && (
+        {/* CONTENEUR DES BOUTONS EN HAUT */}
+        <div className="flex flex-wrap gap-3 shrink-0">
+          {/* 🔥 BOUTON CRÉER PRATICIEN */}
           <button
-            onClick={handleTransmettreFédération}
-            disabled={transmitting}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm shadow-blue-600/10 transition-all shrink-0 self-start lg:self-center"
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm shadow-blue-600/10 transition-all"
           >
-            {transmitting ? (
-              <Loader2 className="animate-spin w-4 h-4" />
-            ) : (
-              <Send size={15} />
-            )}
-            <span>Transmettre à la Fédération ({stats.enAttente})</span>
+            <Plus size={16} />
+            Créer un Praticien
           </button>
-        )}
+
+          {/* BOUTON TRANSMETTRE */}
+          {stats.enAttente > 0 && (
+            <button
+              onClick={handleTransmettreFédération}
+              disabled={transmitting}
+              className="bg-gray-950 hover:bg-gray-800 disabled:opacity-60 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all"
+            >
+              {transmitting ? (
+                <Loader2 className="animate-spin w-4 h-4" />
+              ) : (
+                <Send size={15} />
+              )}
+              <span>Transmettre ({stats.enAttente})</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* STATS GRID */}
@@ -216,6 +237,36 @@ export default function AssociationDashboard() {
           </table>
         </div>
       </div>
+
+      {/* MODAL DE CRÉATION DE PRATICIEN */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-gray-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white w-full max-w-lg p-6 rounded-xl border border-gray-100 shadow-xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+              aria-label="Fermer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="mt-2">
+              <PraticienForm
+                onSuccess={() => {
+                  setIsModalOpen(false)
+                  fetchData()
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

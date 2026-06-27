@@ -30,7 +30,7 @@ export default function PraticiensPage() {
         .from("users")
         .select("role, organisation_id")
         .eq("id", user.id)
-        .single()
+        .maybeSingle() // 🔥 SÉCURISÉ : Remplace .single() pour éviter l'erreur de coercition JSON
 
       let query = supabase.from("praticiens").select("*")
 
@@ -76,6 +76,7 @@ export default function PraticiensPage() {
     const config = {
       certifie: { bg: "bg-green-50 text-green-700 border-green-200", label: "Certifié" },
       en_attente: { bg: "bg-amber-50 text-amber-700 border-amber-200", label: "En attente" },
+      transmis_federation: { bg: "bg-blue-50 text-blue-700 border-blue-200", label: "Transmis" }, // 🔥 AJOUTÉ pour le flux association
       suspendu: { bg: "bg-red-50 text-red-700 border-red-200", label: "Suspendu" }
     }
     const match = config[statut] || { bg: "bg-gray-50 text-gray-700 border-gray-200", label: statut }
@@ -117,6 +118,7 @@ export default function PraticiensPage() {
           >
             <option value="all">Tous les statuts</option>
             <option value="en_attente">En attente</option>
+            <option value="transmis_federation">Transmis</option>
             <option value="certifie">Certifiés</option>
             <option value="suspendu">Suspendus</option>
           </select>
@@ -155,7 +157,6 @@ export default function PraticiensPage() {
 
             <tbody className="divide-y divide-gray-100 text-gray-700">
               {loading ? (
-                // SKELETON LOADER PREVENT JUMPS
                 [...Array(3)].map((_, idx) => (
                   <tr key={idx} className="animate-pulse">
                     <td className="p-4"><div className="h-4 bg-gray-200 rounded w-40" /></td>
@@ -177,8 +178,10 @@ export default function PraticiensPage() {
                     <td className="p-4 font-semibold text-gray-900">
                       {p.nom} {p.prenom}
                     </td>
-                    <td className="p-4 font-mono text-xs font-semibold text-indigo-600 bg-indigo-50/30 px-2 py-1 rounded inline-block mt-3 ml-4">
-                      {p.numero_adherent}
+                    <td className="p-4">
+                      <span className="font-mono text-xs font-semibold text-indigo-600 bg-indigo-50/30 px-2 py-1 rounded inline-block">
+                        {p.numero_adherent || "Non attribué"}
+                      </span>
                     </td>
                     <td className="p-4 text-gray-600">
                       <div className="flex items-center gap-1.5">
