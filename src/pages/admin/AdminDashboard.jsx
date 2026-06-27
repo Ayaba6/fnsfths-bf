@@ -22,12 +22,9 @@ import CarteBurkina from "../../components/map/BurkinaMap"
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
-
   const [modalOpen, setModalOpen] = useState(false)
   const [modalType, setModalType] = useState("reseau")
-
   const [mobileMenu, setMobileMenu] = useState(false)
-
   const [regionFilter, setRegionFilter] = useState("all")
 
   const [stats, setStats] = useState({
@@ -50,7 +47,6 @@ export default function AdminDashboard() {
   // ================= FETCH =================
   const fetchData = async () => {
     setLoading(true)
-
     try {
       const { data: praticiensData } = await supabase
         .from("praticiens")
@@ -66,7 +62,6 @@ export default function AdminDashboard() {
       const associations = orgs?.filter(o => o.type === "association").length || 0
 
       const regStats = {}
-
       praticiens.forEach(p => {
         if (!p.region) return
         regStats[p.region] = (regStats[p.region] || 0) + 1
@@ -89,15 +84,13 @@ export default function AdminDashboard() {
           : praticiens.filter(p => p.region === regionFilter)
 
       setRecentPraticiens(
-        [...filtered]
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        ...[filtered]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 5)
       )
-
     } catch (err) {
       console.error(err)
     }
-
     setLoading(false)
   }
 
@@ -107,85 +100,89 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Chargement...
+      <div className="h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-medium">
+        <Clock className="animate-spin mr-2" /> Chargement...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-
-      {/* ================= HEADER MOBILE ================= */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl md:text-3xl font-bold flex items-center gap-2">
-          <Shield className="text-green-600" />
-          Dashboard FNSTHS
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      
+      {/* ================= HEADER ================= */}
+      <div className="flex items-center justify-between mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3 text-gray-800">
+          <Shield className="text-green-600 w-8 h-8 md:w-9 md:h-9" />
+          <span>Dashboard FNSTHS</span>
         </h1>
 
         <button
-          className="md:hidden p-2 bg-white rounded border"
+          className="md:hidden p-2 bg-white rounded-lg border shadow-sm text-gray-600 hover:bg-gray-50 transition-colors"
           onClick={() => setMobileMenu(!mobileMenu)}
+          aria-label="Menu de navigation"
         >
-          <Menu />
+          <Menu size={24} />
         </button>
       </div>
 
-      {/* ================= MOBILE MENU ================= */}
+      {/* ================= MOBILE MENU OVERLAY ================= */}
       {mobileMenu && (
-        <div className="md:hidden mb-4 bg-white p-4 rounded-xl border space-y-2">
-          <ActionCard icon={<Network />} title="Créer Réseau" onClick={() => {
-            setModalType("reseau")
-            setModalOpen(true)
-            setMobileMenu(false)
-          }} />
+        <div className="md:hidden fixed inset-0 bg-black/40 z-40 transition-opacity" onClick={() => setMobileMenu(false)}>
+          <div 
+            className="absolute top-20 right-4 left-4 bg-white p-4 rounded-xl border shadow-xl space-y-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => {
+              setModalType("reseau")
+              setModalOpen(true)
+              setMobileMenu(false)
+            }} />
 
-          <ActionCard icon={<Building2 />} title="Créer Association" onClick={() => {
-            setModalType("association")
-            setModalOpen(true)
-            setMobileMenu(false)
-          }} />
+            <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => {
+              setModalType("association")
+              setModalOpen(true)
+              setMobileMenu(false)
+            }} />
 
-          <ActionCard icon={<Plus />} title="Ajouter Praticien" onClick={() => {
-            setModalType("praticien")
-            setModalOpen(true)
-            setMobileMenu(false)
-          }} />
+            <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => {
+              setModalType("praticien")
+              setModalOpen(true)
+              setMobileMenu(false)
+            }} />
+          </div>
         </div>
       )}
 
       {/* ================= ACTIONS DESKTOP ================= */}
-      <div className="hidden md:grid grid-cols-3 gap-4 mb-6">
-
-        <ActionCard icon={<Network />} title="Créer Réseau" onClick={() => {
+      <div className="hidden md:grid grid-cols-3 gap-4 mb-8">
+        <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => {
           setModalType("reseau")
           setModalOpen(true)
         }} />
 
-        <ActionCard icon={<Building2 />} title="Créer Association" onClick={() => {
+        <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => {
           setModalType("association")
           setModalOpen(true)
         }} />
 
-        <ActionCard icon={<Plus />} title="Ajouter Praticien" onClick={() => {
+        <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => {
           setModalType("praticien")
           setModalOpen(true)
         }} />
-
       </div>
 
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-        <StatCard icon={<Users />} title="Praticiens" value={stats.praticiens} />
-        <StatCard icon={<Network />} title="Réseaux" value={stats.reseaux} />
-        <StatCard icon={<Building2 />} title="Associations" value={stats.associations} />
-        <StatCard icon={<CheckCircle />} title="Certifiés" value={stats.certifies} />
-        <StatCard icon={<Clock />} title="Attente" value={stats.enAttente} />
-        <StatCard icon={<XCircle />} title="Suspendus" value={stats.suspendus} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-8">
+        <StatCard icon={<Users className="text-blue-500" />} title="Praticiens" value={stats.praticiens} />
+        <StatCard icon={<Network className="text-purple-500" />} title="Réseaux" value={stats.reseaux} />
+        <StatCard icon={<Building2 className="text-amber-500" />} title="Associations" value={stats.associations} />
+        <StatCard icon={<CheckCircle className="text-green-500" />} title="Certifiés" value={stats.certifies} />
+        <StatCard icon={<Clock className="text-orange-500" />} title="Attente" value={stats.enAttente} />
+        <StatCard icon={<XCircle className="text-red-500" />} title="Suspendus" value={stats.suspendus} />
       </div>
 
       {/* ================= CARTE ================= */}
-      <div className="mb-6">
+      <div className="mb-8 bg-white p-4 rounded-xl border shadow-sm overflow-hidden">
         <CarteBurkina
           selected={regionFilter}
           onSelect={setRegionFilter}
@@ -194,33 +191,51 @@ export default function AdminDashboard() {
       </div>
 
       {/* ================= TABLE ================= */}
-      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm overflow-x-auto">
-        <h2 className="font-bold mb-4 flex items-center gap-2">
-          <MapPin size={18} />
-          Derniers praticiens
-        </h2>
-
-        <table className="w-full text-sm min-w-[600px]">
-          <thead>
-            <tr className="text-left text-gray-500">
-              <th>Nom</th>
-              <th>Numéro</th>
-              <th>Région</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {recentPraticiens.map((p) => (
-              <tr key={p.id} className="border-t hover:bg-gray-50">
-                <td>{p.nom} {p.prenom}</td>
-                <td className="text-green-700">{p.numero_adherent}</td>
-                <td>{p.region}</td>
-                <td>{p.statut}</td>
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+        <div className="p-4 md:p-5 border-b">
+          <h2 className="font-bold text-gray-800 flex items-center gap-2">
+            <MapPin size={18} className="text-gray-500" />
+            Derniers praticiens
+          </h2>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr className="bg-gray-50 text-gray-500 font-medium border-b">
+                <th className="py-3 px-4">Nom</th>
+                <th className="py-3 px-4">Numéro</th>
+                <th className="py-3 px-4">Région</th>
+                <th className="py-3 px-4">Statut</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100">
+              {recentPraticiens.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-6 text-center text-gray-400">Aucun praticien trouvé</td>
+                </tr>
+              ) : (
+                recentPraticiens.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50/70 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-gray-800">{p.nom} {p.prenom}</td>
+                    <td className="py-3.5 px-4 text-green-700 font-semibold">{p.numero_adherent}</td>
+                    <td className="py-3.5 px-4 text-gray-600">{p.region}</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        ${p.statut === 'certifie' ? 'bg-green-50 text-green-700 border border-green-200' : ''}
+                        ${p.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border border-amber-200' : ''}
+                        ${p.statut === 'suspendu' ? 'bg-red-50 text-red-700 border border-red-200' : ''}
+                      `}>
+                        {p.statut}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ================= MODAL ================= */}
@@ -239,20 +254,26 @@ export default function AdminDashboard() {
   )
 }
 
-/* ================= MODAL ================= */
+/* ================= MODAL COMPONENT ================= */
 function Modal({ children, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+    <div 
+      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-3xl p-5 md:p-6 rounded-xl relative"
+        className="bg-white w-full max-w-2xl rounded-xl relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="absolute top-3 right-3" onClick={onClose}>
-          <X />
+        <button 
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" 
+          onClick={onClose}
+        >
+          <X size={20} />
         </button>
-        {children}
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>
   )
@@ -269,11 +290,11 @@ function CreateForm({ type, onSuccess }) {
 /* ================= UI COMPONENTS ================= */
 function StatCard({ icon, title, value }) {
   return (
-    <div className="bg-white p-3 md:p-4 rounded-xl border">
-      <div className="flex items-center gap-2 text-gray-500 text-xs md:text-sm">
-        {icon} {title}
+    <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col justify-between gap-1">
+      <div className="flex items-center gap-2 text-gray-500 text-xs md:text-sm font-medium">
+        {icon} <span className="truncate">{title}</span>
       </div>
-      <div className="text-lg md:text-2xl font-bold">{value}</div>
+      <div className="text-xl md:text-2xl font-bold text-gray-800 mt-1">{value}</div>
     </div>
   )
 }
@@ -282,10 +303,12 @@ function ActionCard({ icon, title, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white p-4 rounded-xl border cursor-pointer hover:border-green-500 flex items-center gap-3"
+      className="bg-white p-4 rounded-xl border border-gray-200 cursor-pointer shadow-sm hover:border-green-500 hover:shadow-md hover:bg-green-50/10 flex items-center gap-3 transition-all duration-200 select-none"
     >
-      {icon}
-      <span className="font-semibold text-sm md:text-base">{title}</span>
+      <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-transparent">
+        {icon}
+      </div>
+      <span className="font-semibold text-sm md:text-base text-gray-700">{title}</span>
     </div>
   )
 }

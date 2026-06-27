@@ -11,7 +11,6 @@ export default function Layout({ children }) {
   useEffect(() => {
     const fetchRole = async () => {
       setLoading(true)
-
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -32,7 +31,6 @@ export default function Layout({ children }) {
       } else {
         setRole((data?.role || "").toLowerCase().trim())
       }
-
       setLoading(false)
     }
 
@@ -41,7 +39,7 @@ export default function Layout({ children }) {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-gray-100 text-gray-500">
         Chargement...
       </div>
     )
@@ -51,19 +49,22 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen bg-gray-100">
 
       {/* ================= MOBILE HEADER ================= */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b p-3 flex items-center justify-between z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b px-4 flex items-center justify-between z-50 shadow-sm">
         <h1 className="font-bold text-green-600">FNSTHS</h1>
-
-        <button onClick={() => setOpen(!open)}>
-          {open ? <X /> : <Menu />}
+        <button 
+          onClick={() => setOpen(!open)}
+          className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+        >
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {/* ================= SIDEBAR ================= */}
+      {/* CORRECTION : Reste en fixed sur desktop pour un comportement de dashboard classique */}
       <div
         className={`
-          fixed md:static z-40 h-full md:h-auto
-          transition-transform duration-300
+          fixed inset-y-0 left-0 z-40 h-full w-64 bg-white
+          transition-transform duration-300 ease-in-out
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
@@ -73,14 +74,17 @@ export default function Layout({ children }) {
       {/* ================= OVERLAY MOBILE ================= */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 md:hidden z-30"
+          className="fixed inset-0 bg-black/40 md:hidden z-30 backdrop-blur-xs"
           onClick={() => setOpen(false)}
         />
       )}
 
-      {/* ================= CONTENT ================= */}
-      <main className="flex-1 p-6 overflow-y-auto md:ml-64 mt-14 md:mt-0">
-        {children}
+      {/* ================= MAIN CONTENT ================= */}
+      {/* CORRECTION : md:ml-64 fonctionne parfaitement maintenant car la sidebar est fixed */}
+      <main className="flex-1 min-w-0 overflow-y-auto md:ml-64 pt-20 md:pt-0">
+        <div className="w-full">
+          {children}
+        </div>
       </main>
     </div>
   )

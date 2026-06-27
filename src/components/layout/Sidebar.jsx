@@ -18,10 +18,10 @@ function NavItem({ icon: Icon, label, to, onClick }) {
       to={to}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-4 py-2 rounded-lg transition ${
+        `flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-all ${
           isActive
-            ? "bg-green-600 text-white"
-            : "text-gray-700 hover:bg-gray-100"
+            ? "bg-green-600 text-white shadow-sm shadow-green-600/20"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
         }`
       }
     >
@@ -35,42 +35,42 @@ export default function Sidebar({ role, onClose }) {
   const navigate = useNavigate()
   const safeRole = (role || "").toLowerCase()
 
-  // ================= LOGOUT =================
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate("/")
   }
 
   return (
-    <div className="h-screen w-64 bg-white border-r shadow-sm flex flex-col relative">
+    <div className="h-full w-64 bg-white border-r border-gray-200 shadow-xs flex flex-col relative">
 
       {/* ================= MOBILE CLOSE BTN ================= */}
       {onClose && (
         <button
           onClick={onClose}
-          className="md:hidden absolute top-3 right-3 p-2"
+          className="md:hidden absolute top-4 right-4 p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg transition-colors"
+          aria-label="Fermer le menu"
         >
-          <X />
+          <X size={20} />
         </button>
       )}
 
       {/* ================= HEADER ================= */}
-      <div className="p-5 border-b">
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Shield className="text-green-600" />
-          FNSTHS
+      {/* Modification : Remplacement de h-20 par un padding vertical py-5 pour accueillir le texte sur deux lignes */}
+      <div className="px-5 py-5 border-b border-gray-100 flex flex-col justify-center">
+        <h1 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+          <Shield className="text-green-600 w-6 h-6" />
+          <span>FNSTHS</span>
         </h1>
-
-        <p className="text-xs text-gray-500">
+        {/* Correction ici : retrait de 'truncate', ajout de 'leading-tight' pour un retour à la ligne propre */}
+        <p className="text-xs text-gray-400 mt-1 font-medium leading-tight">
           {safeRole === "admin_federation" && "Administration Fédération"}
           {safeRole === "reseau" && "Espace Réseau"}
           {safeRole === "association" && "Espace Association"}
         </p>
       </div>
 
-      {/* ================= NAV ================= */}
-      <nav className="flex-1 p-4 space-y-2">
-
+      {/* ================= NAV LINKS ================= */}
+      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
         {/* ADMIN */}
         {safeRole === "admin_federation" && (
           <>
@@ -98,29 +98,26 @@ export default function Sidebar({ role, onClose }) {
             <NavItem to="/association/praticiens" icon={Users} label="Praticiens" onClick={onClose} />
           </>
         )}
-
       </nav>
 
       {/* ================= FOOTER ================= */}
-      <div className="p-4 border-t space-y-2">
-
+      <div className="p-4 border-t border-gray-100 space-y-1">
         <NavLink
           to="/settings"
           onClick={onClose}
-          className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors"
         >
           <Settings size={18} />
-          Paramètres
+          <span>Paramètres</span>
         </NavLink>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 w-full"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 font-medium hover:bg-red-50 w-full text-left transition-colors"
         >
           <LogOut size={18} />
-          Déconnexion
+          <span>Déconnexion</span>
         </button>
-
       </div>
     </div>
   )

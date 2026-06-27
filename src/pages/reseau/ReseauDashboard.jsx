@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, cloneElement } from "react"
 import { supabase } from "../../services/supabase"
 
 import {
@@ -8,7 +8,9 @@ import {
   CheckCircle,
   Network,
   Plus,
-  X
+  X,
+  Building2,
+  Loader2
 } from "lucide-react"
 
 /* ✅ IMPORT DES VRAIS MODALS */
@@ -32,14 +34,17 @@ export default function ReseauDashboard() {
   /* ================= LOCK SCROLL ================= */
   useEffect(() => {
     document.body.style.overflow = modal ? "hidden" : "auto"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
   }, [modal])
 
-  /* ================= FETCH ================= */
+  /* ================= FETCH DATA ================= */
   const fetchData = async () => {
     setLoading(true)
-
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
       const { data: profile } = await supabase
         .from("users")
@@ -47,7 +52,8 @@ export default function ReseauDashboard() {
         .eq("id", user.id)
         .single()
 
-      const orgId = profile.organisation_id
+      const orgId = profile?.organisation_id
+      if (!orgId) return
 
       const { data: associations } = await supabase
         .from("organisations")
@@ -56,7 +62,6 @@ export default function ReseauDashboard() {
         .eq("parent_id", orgId)
 
       const associationIds = (associations || []).map(a => a.id)
-
       let praticiens = []
 
       if (associationIds.length > 0) {
@@ -78,61 +83,95 @@ export default function ReseauDashboard() {
 
     } catch (err) {
       console.error("FETCH ERROR:", err)
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   useEffect(() => {
     fetchData()
   }, [refresh])
 
-  if (loading) return <div className="p-6">Chargement...</div>
-
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50/50 min-h-screen space-y-6 max-w-7xl mx-auto">
 
-      {/* HEADER */}
-      <h1 className="text-3xl font-bold mb-6">
-        🌐 Dashboard Réseau
-      </h1>
+      {/* HEADER & ACTIONS PANEL */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-gray-100 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+            <Network className="text-green-600 w-7 h-7" />
+            🌐 Dashboard Réseau
+          </h1>
+          <p className="text-sm text-gray-500">
+            Vue d'ensemble de votre coordination régionale et suivi des certifications.
+          </p>
+        </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        {/* 🔥 BOUTONS PLACÉS EN HAUT DE PAGE */}
+        <div className="flex flex-wrap gap-3 shrink-0">
+          <button
+            onClick={() => setModal("association")}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm shadow-green-600/10 transition-all"
+          >
+            <Plus size={16} />
+            Créer une Association
+          </button>
 
-        <StatCard icon={<Network />} title="Associations" value={stats.associations} />
-        <StatCard icon={<Users />} title="Praticiens" value={stats.praticiens} />
-        <StatCard icon={<Clock />} title="En attente" value={stats.enAttente} />
-        <StatCard icon={<Send />} title="Transmis" value={stats.transmis} />
-        <StatCard icon={<CheckCircle />} title="Certifiés" value={stats.certifies} />
-
+          <button
+            onClick={() => setModal("praticien")}
+            className="bg-gray-950 hover:bg-gray-800 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all"
+          >
+            <Users size={16} />
+            Ajouter un Praticien
+          </button>
+        </div>
       </div>
 
-      {/* ACTIONS */}
-      <div className="bg-white p-4 rounded-xl shadow flex gap-3">
-
-        <button
-          onClick={() => setModal("association")}
-          className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Créer Association
-        </button>
-
-        <button
-          onClick={() => setModal("praticien")}
-          className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        >
-          <Users size={16} />
-          Ajouter Praticien
-        </button>
-
+      {/* STATS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {loading ? (
+          [...Array(5)].map((_, idx) => (
+            <div key={idx} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm animate-pulse h-24" />
+          ))
+        ) : (
+          <>
+            <StatCard 
+              icon={<Building2 />} 
+              title="Associations" 
+              value={stats.associations} 
+              colorClass="text-green-600 bg-green-50 border-green-100" 
+            />
+            <StatCard 
+              icon={<Users />} 
+              title="Praticiens" 
+              value={stats.praticiens} 
+              colorClass="text-indigo-600 bg-indigo-50 border-indigo-100" 
+            />
+            <StatCard 
+              icon={<Clock />} 
+              title="En attente" 
+              value={stats.enAttente} 
+              colorClass="text-amber-600 bg-amber-50 border-amber-100" 
+            />
+            <StatCard 
+              icon={<Send />} 
+              title="Transmis" 
+              value={stats.transmis} 
+              colorClass="text-blue-600 bg-blue-50 border-blue-100" 
+            />
+            <StatCard 
+              icon={<CheckCircle />} 
+              title="Certifiés" 
+              value={stats.certifies} 
+              colorClass="text-emerald-600 bg-emerald-50 border-emerald-100" 
+            />
+          </>
+        )}
       </div>
 
-      {/* MODAL */}
+      {/* MODAL SYSTEM */}
       {modal && (
         <Modal onClose={() => setModal(null)}>
-
           {modal === "association" && (
             <AssociationForm
               onSuccess={() => {
@@ -150,7 +189,6 @@ export default function ReseauDashboard() {
               }}
             />
           )}
-
         </Modal>
       )}
 
@@ -158,39 +196,43 @@ export default function ReseauDashboard() {
   )
 }
 
-/* ================= STATS CARD ================= */
-function StatCard({ icon, title, value }) {
+/* ================= STATS CARD COMPONENT ================= */
+function StatCard({ icon, title, value, colorClass }) {
   return (
-    <div className="bg-white p-4 rounded-xl border shadow-sm">
-      <div className="flex items-center gap-2 text-gray-500">
-        {icon}
-        {title}
+    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between gap-2">
+      <div className="space-y-1">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">{title}</span>
+        <span className="text-3xl font-bold text-gray-900 tracking-tight block">{value}</span>
       </div>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className={`p-3 rounded-xl border shrink-0 ${colorClass}`}>
+        {cloneElement(icon, { size: 22 })}
+      </div>
     </div>
   )
 }
 
-/* ================= MODAL ================= */
+/* ================= MODERN MODAL WRAPPER ================= */
 function Modal({ children, onClose }) {
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-gray-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white w-[520px] p-6 rounded-xl relative"
+        className="bg-white w-full max-w-lg p-6 rounded-xl border border-gray-100 shadow-xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-black"
+          className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+          aria-label="Fermer"
         >
-          <X />
+          <X size={18} />
         </button>
 
-        {children}
+        <div className="mt-2">
+          {children}
+        </div>
       </div>
     </div>
   )
