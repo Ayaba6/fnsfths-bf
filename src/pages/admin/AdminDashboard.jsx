@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../services/supabase"
-
 import {
   Users,
   Network,
@@ -84,7 +83,7 @@ export default function AdminDashboard() {
           : praticiens.filter(p => p.region === regionFilter)
 
       setRecentPraticiens(
-        ...[filtered]
+        filtered
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 5)
       )
@@ -119,56 +118,27 @@ export default function AdminDashboard() {
         <button
           className="md:hidden p-2 bg-white rounded-lg border shadow-sm text-gray-600 hover:bg-gray-50 transition-colors"
           onClick={() => setMobileMenu(!mobileMenu)}
-          aria-label="Menu de navigation"
         >
           <Menu size={24} />
         </button>
       </div>
 
-      {/* ================= MOBILE MENU OVERLAY ================= */}
+      {/* ================= MOBILE MENU ================= */}
       {mobileMenu && (
-        <div className="md:hidden fixed inset-0 bg-black/40 z-40 transition-opacity" onClick={() => setMobileMenu(false)}>
-          <div 
-            className="absolute top-20 right-4 left-4 bg-white p-4 rounded-xl border shadow-xl space-y-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => {
-              setModalType("reseau")
-              setModalOpen(true)
-              setMobileMenu(false)
-            }} />
-
-            <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => {
-              setModalType("association")
-              setModalOpen(true)
-              setMobileMenu(false)
-            }} />
-
-            <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => {
-              setModalType("praticien")
-              setModalOpen(true)
-              setMobileMenu(false)
-            }} />
+        <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileMenu(false)}>
+          <div className="absolute top-20 right-4 left-4 bg-white p-4 rounded-xl border shadow-xl space-y-2" onClick={(e) => e.stopPropagation()}>
+            <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => { setModalType("reseau"); setModalOpen(true); setMobileMenu(false) }} />
+            <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => { setModalType("association"); setModalOpen(true); setMobileMenu(false) }} />
+            <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => { setModalType("praticien"); setModalOpen(true); setMobileMenu(false) }} />
           </div>
         </div>
       )}
 
       {/* ================= ACTIONS DESKTOP ================= */}
       <div className="hidden md:grid grid-cols-3 gap-4 mb-8">
-        <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => {
-          setModalType("reseau")
-          setModalOpen(true)
-        }} />
-
-        <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => {
-          setModalType("association")
-          setModalOpen(true)
-        }} />
-
-        <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => {
-          setModalType("praticien")
-          setModalOpen(true)
-        }} />
+        <ActionCard icon={<Network className="text-blue-500" />} title="Créer Réseau" onClick={() => { setModalType("reseau"); setModalOpen(true) }} />
+        <ActionCard icon={<Building2 className="text-amber-500" />} title="Créer Association" onClick={() => { setModalType("association"); setModalOpen(true) }} />
+        <ActionCard icon={<Plus className="text-green-600" />} title="Ajouter Praticien" onClick={() => { setModalType("praticien"); setModalOpen(true) }} />
       </div>
 
       {/* ================= STATS ================= */}
@@ -183,103 +153,91 @@ export default function AdminDashboard() {
 
       {/* ================= CARTE ================= */}
       <div className="mb-8 bg-white p-4 rounded-xl border shadow-sm overflow-hidden">
-        <CarteBurkina
-          selected={regionFilter}
-          onSelect={setRegionFilter}
-          stats={regionStats}
-        />
+        <CarteBurkina selected={regionFilter} onSelect={setRegionFilter} stats={regionStats} />
       </div>
 
-      {/* ================= TABLE ================= */}
+      {/* ================= LISTE PRATICIENS (REFACTO) ================= */}
       <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-4 md:p-5 border-b">
+        <div className="p-4 md:p-5 border-b flex justify-between items-center">
           <h2 className="font-bold text-gray-800 flex items-center gap-2">
-            <MapPin size={18} className="text-gray-500" />
-            Derniers praticiens
+            <MapPin size={18} className="text-gray-500" /> Derniers praticiens
           </h2>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 font-medium border-b">
+        {/* VUE TABLEAU (DESKTOP) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-500">
+              <tr>
                 <th className="py-3 px-4">Nom</th>
                 <th className="py-3 px-4">Numéro</th>
                 <th className="py-3 px-4">Région</th>
                 <th className="py-3 px-4">Statut</th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-gray-100">
-              {recentPraticiens.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-6 text-center text-gray-400">Aucun praticien trouvé</td>
-                </tr>
-              ) : (
-                recentPraticiens.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50/70 transition-colors">
-                    <td className="py-3.5 px-4 font-medium text-gray-800">{p.nom} {p.prenom}</td>
-                    <td className="py-3.5 px-4 text-green-700 font-semibold">{p.numero_adherent}</td>
-                    <td className="py-3.5 px-4 text-gray-600">{p.region}</td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        ${p.statut === 'certifie' ? 'bg-green-50 text-green-700 border border-green-200' : ''}
-                        ${p.statut === 'en_attente' ? 'bg-amber-50 text-amber-700 border border-amber-200' : ''}
-                        ${p.statut === 'suspendu' ? 'bg-red-50 text-red-700 border border-red-200' : ''}
-                      `}>
-                        {p.statut}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
+              {recentPraticiens.map((p) => <PraticienRow key={p.id} p={p} />)}
             </tbody>
           </table>
         </div>
+
+        {/* VUE CARDS (MOBILE) */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {recentPraticiens.map((p) => (
+            <div key={p.id} className="p-4 flex justify-between items-center hover:bg-gray-50">
+              <div>
+                <p className="font-bold text-gray-800">{p.nom} {p.prenom}</p>
+                <p className="text-xs text-gray-500">{p.region} • <span className="font-mono text-green-600">{p.numero_adherent}</span></p>
+              </div>
+              <StatutBadge statut={p.statut} />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* ================= MODAL ================= */}
       {modalOpen && (
         <Modal onClose={() => setModalOpen(false)}>
-          <CreateForm
-            type={modalType}
-            onSuccess={() => {
-              setModalOpen(false)
-              fetchData()
-            }}
-          />
+          <CreateForm type={modalType} onSuccess={() => { setModalOpen(false); fetchData() }} />
         </Modal>
       )}
     </div>
   )
 }
 
-/* ================= MODAL COMPONENT ================= */
+/* ================= SOUS-COMPOSANTS ================= */
+
+function StatutBadge({ statut }) {
+  const base = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border";
+  const colors = {
+    certifie: 'bg-green-50 text-green-700 border-green-200',
+    en_attente: 'bg-amber-50 text-amber-700 border-amber-200',
+    suspendu: 'bg-red-50 text-red-700 border-red-200'
+  };
+  return <span className={`${base} ${colors[statut] || 'bg-gray-50'}`}>{statut}</span>;
+}
+
+function PraticienRow({ p }) {
+  return (
+    <tr className="hover:bg-gray-50/70">
+      <td className="py-3.5 px-4 font-medium text-gray-800">{p.nom} {p.prenom}</td>
+      <td className="py-3.5 px-4 text-green-700 font-semibold">{p.numero_adherent}</td>
+      <td className="py-3.5 px-4 text-gray-600">{p.region}</td>
+      <td className="py-3.5 px-4"><StatutBadge statut={p.statut} /></td>
+    </tr>
+  );
+}
+
 function Modal({ children, onClose }) {
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white w-full max-w-2xl rounded-xl relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button 
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" 
-          onClick={onClose}
-        >
-          <X size={20} />
-        </button>
-        <div className="p-6">
-          {children}
-        </div>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white w-full max-w-2xl rounded-xl relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <button className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100" onClick={onClose}><X size={20} /></button>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   )
 }
 
-/* ================= FORM SWITCH ================= */
 function CreateForm({ type, onSuccess }) {
   if (type === "reseau") return <ReseauForm onSuccess={onSuccess} />
   if (type === "association") return <AssociationForm onSuccess={onSuccess} />
@@ -287,28 +245,20 @@ function CreateForm({ type, onSuccess }) {
   return null
 }
 
-/* ================= UI COMPONENTS ================= */
 function StatCard({ icon, title, value }) {
   return (
-    <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col justify-between gap-1">
-      <div className="flex items-center gap-2 text-gray-500 text-xs md:text-sm font-medium">
-        {icon} <span className="truncate">{title}</span>
-      </div>
-      <div className="text-xl md:text-2xl font-bold text-gray-800 mt-1">{value}</div>
+    <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col gap-1">
+      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">{icon} {title}</div>
+      <div className="text-xl font-bold text-gray-800">{value}</div>
     </div>
   )
 }
 
 function ActionCard({ icon, title, onClick }) {
   return (
-    <div
-      onClick={onClick}
-      className="bg-white p-4 rounded-xl border border-gray-200 cursor-pointer shadow-sm hover:border-green-500 hover:shadow-md hover:bg-green-50/10 flex items-center gap-3 transition-all duration-200 select-none"
-    >
-      <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-transparent">
-        {icon}
-      </div>
-      <span className="font-semibold text-sm md:text-base text-gray-700">{title}</span>
+    <div onClick={onClick} className="bg-white p-4 rounded-xl border border-gray-200 cursor-pointer shadow-sm hover:border-green-500 hover:bg-green-50/10 flex items-center gap-3 transition-all">
+      <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+      <span className="font-semibold text-sm text-gray-700">{title}</span>
     </div>
   )
 }
