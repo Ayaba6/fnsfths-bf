@@ -4,7 +4,7 @@ import { login, getUserRole } from "../../services/authService"
 import { Mail, Lock, Loader2, AlertCircle } from "lucide-react"
 
 /* 🚨 ASSURE-TOI QUE LE CHEMIN VERS TON LOGO EST CORRECT */
-import logoImage from "../../assets/logo.jpg" 
+import logoImage from "@/assets/logo.jpg" 
 
 export default function Login() {
   const [email, setEmail] = useState("")
