@@ -1,57 +1,195 @@
-import { Link } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { supabase } from "../../services/supabase"
+import { Search, SlidersHorizontal, IdCard, MapPin, Eye, Loader2 } from "lucide-react"
 
 export default function CarteList() {
   const [praticiens, setPraticiens] = useState([])
+  const [loading, setLoading] = useState(true)
+  
+  // États pour la recherche et les filtres
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [regionFilter, setRegionFilter] = useState("all")
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchPraticiens = async () => {
+      setLoading(true)
       const { data, error } = await supabase
         .from("praticiens")
-        .select("id, nom, prenom, region, statut")
+        .select("id, nom, prenom, region, statut, numero_adherent, specialite, photo")
 
       if (!error) setPraticiens(data || [])
+      setLoading(false)
     }
 
-    fetch()
+    fetchPraticiens()
   }, [])
 
-  return (
-    <div className="p-6">
+  // CORRECTION ICI : "regionsUniques" en un seul mot
+  const regionsUniques = [...new Set(praticiens.map((p) => p.region).filter(Boolean))]
 
-      <h1 className="text-xl font-bold mb-4">
-        📇 Liste des cartes FNSTHS
-      </h1>
+  // Logique de filtrage
+  const filteredPraticiens = praticiens.filter((p) => {
+    const matchesSearch = `${p.nom} ${p.prenom} ${p.numero_adherent || ""}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+    
+    const matchesStatus = statusFilter === "all" ? true : p.statut === statusFilter
+    const matchesRegion = regionFilter === "all" ? true : p.region === regionFilter
 
-      <div className="grid md:grid-cols-3 gap-4">
+    return matchesSearch && matchesStatus && matchesRegion
+  })
 
-        {praticiens.map((p) => (
-          <div key={p.id} className="bg-white p-4 rounded-xl shadow">
-
-            <p className="font-bold">
-              {p.nom} {p.prenom}
-            </p>
-
-            <p className="text-sm text-gray-500">
-              {p.region}
-            </p>
-
-            <p className="text-xs mt-1">
-              Statut: {p.statut}
-            </p>
-
-            <Link
-              to={`/admin/praticiens/carte/${p.id}`}
-              className="text-green-600 text-sm mt-2 block"
-            >
-              Voir carte →
-            </Link>
-
-          </div>
-        ))}
-
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-2">
+        <Loader2 className="animate-spin text-green-600 w-8 h-8" />
+        <p className="text-sm text-gray-500 font-medium">Chargement du registre des cartes...</p>
       </div>
+    )
+  }
+
+  return (
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-200 pb-4">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <IdCard className="text-green-600 w-5 h-5" />
+            Cartes d'Adhérents FNSTHS
+          </h1>
+          <p className="text-xs text-gray-500 mt-0.5">Gérer, rechercher et prévisualiser les cartes officielles de la fédération.</p>
+        </div>
+      </div>
+
+      {/* BARRE DE RECHERCHE & FILTRES */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Champ Recherche */}
+        <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-gray-50/50 focus-within:ring-2 focus-within:ring-green-500/20 focus-within:border-green-500 transition-all">
+          <Search size={16} className="text-gray-400 shrink-0" />
+          <input
+            className="p-2 bg-transparent outline-none w-full text-sm placeholder-gray-400"
+            placeholder="Rechercher par nom, prénom, ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Filtre Statut */}
+        <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-white text-sm focus-within:ring-2 focus-within:ring-green-500/20 focus-within:border-green-500 transition-all">
+          <SlidersHorizontal size={14} className="text-gray-400 mr-2" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="py-2 bg-transparent outline-none text-gray-700 font-medium w-full text-xs"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="actif">Actifs</option>
+            <option value="en_attente">En attente</option>
+            <option value="suspendu">Suspendus</option>
+          </select>
+        </div>
+
+        {/* Filtre Région */}
+        <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-white text-sm focus-within:ring-2 focus-within:ring-green-500/20 focus-within:border-green-500 transition-all">
+          <MapPin size={14} className="text-gray-400 mr-2" />
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className="py-2 bg-transparent outline-none text-gray-700 font-medium w-full text-xs"
+          >
+            <option value="all">Toutes les régions</option>
+            {regionsUniques.map((reg) => (
+              <option key={reg} value={reg}>{reg}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* GRILLE DES PRATICIENS / BADGES */}
+      {filteredPraticiens.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300 text-gray-400 italic text-sm">
+          Aucun praticien trouvé avec ces critères de recherche.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPraticiens.map((p) => (
+            <div 
+              key={p.id} 
+              className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+            >
+              {/* Infos en-tête */}
+              <div className="flex justify-between items-start gap-2 mb-3">
+                <div>
+                  <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">
+                    {p.nom} {p.prenom}
+                  </h3>
+                  <p className="text-xs text-gray-400 font-mono mt-0.5">{p.numero_adherent || "ID : En attente"}</p>
+                </div>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  p.statut === 'actif' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                  {p.statut || "N/A"}
+                </span>
+              </div>
+
+              {/* 🗂️ ZONE APERÇU MINIATURES RECTO / VERSO */}
+              <div className="grid grid-cols-2 gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-100 my-2">
+                
+                {/* Mini Recto */}
+                <div className="aspect-[1.58/1] bg-white border border-gray-200 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden shadow-xs">
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-green-600"></div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-5 h-6 bg-gray-100 rounded object-cover border shrink-0 overflow-hidden">
+                      {p.photo && <img src={p.photo} className="w-full h-full object-cover" alt="" />}
+                    </div>
+                    <div className="scale-[0.6] origin-left whitespace-nowrap leading-none text-gray-800 font-bold uppercase">
+                      {p.nom}
+                    </div>
+                  </div>
+                  <div className="text-[6px] text-gray-400 font-mono truncate">{p.numero_adherent}</div>
+                </div>
+
+                {/* Mini Verso */}
+                <div className="aspect-[1.58/1] bg-gray-800 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden shadow-xs">
+                  <div className="space-y-0.5 scale-[0.65] origin-top-left w-[150%]">
+                    <div className="text-[7px] text-green-400 font-bold uppercase tracking-tighter">VERSO OFFICIEL</div>
+                    <div className="h-0.5 bg-gray-700 w-full"></div>
+                    <div className="text-[5px] text-gray-400 leading-tight">Carte soumise aux règlements fédéraux.</div>
+                  </div>
+                  <div className="w-full flex justify-end">
+                    <div className="w-6 h-3 border border-dashed border-gray-600 rounded bg-white/5"></div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* INFOS INFÉRIEURES */}
+              <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100 mt-2">
+                <span className="flex items-center gap-1">
+                  <MapPin size={12} className="text-gray-400" />
+                  {p.region || "Non définie"}
+                </span>
+                <span className="italic text-gray-400 text-[11px] max-w-[150px] truncate">
+                  {p.specialite || "Tradipraticien"}
+                </span>
+              </div>
+
+              {/* BOUTON D'ACTION */}
+              <Link
+                to={`/admin/praticiens/carte/${p.id}`}
+                className="w-full bg-gray-100 hover:bg-green-600 hover:text-white text-gray-700 font-medium text-center py-2 rounded-xl text-xs mt-3 flex items-center justify-center gap-1.5 transition-all"
+              >
+                <Eye size={14} />
+                <span>Voir et Imprimer la carte</span>
+              </Link>
+
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

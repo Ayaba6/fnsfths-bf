@@ -25,6 +25,7 @@
     "react-leaflet": "^5.0.0",
     "react-qr-code": "^2.2.0",
     "react-router-dom": "^7.18.0",
+    "react-to-print": "^3.3.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
