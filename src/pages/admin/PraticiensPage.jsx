@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../services/supabase"
-import { Eye, Search, MapPin, SlidersHorizontal, User } from "lucide-react"
+import { Eye, Search, User } from "lucide-react"
 
 const REGIONS_BF = [
   "Boucle du Mouhoun", "Cascades", "Centre", "Centre-Est", "Centre-Nord", 
@@ -59,7 +59,6 @@ export default function PraticiensPage() {
         </div>
       </div>
 
-      {/* FILTRES */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-gray-50/50">
           <Search size={16} className="text-gray-400 shrink-0" />
@@ -78,13 +77,12 @@ export default function PraticiensPage() {
         </select>
       </div>
 
-      {/* LISTE / TABLE */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* VUE TABLEAU (Desktop) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
               <tr>
+                <th className="p-4 text-left">Photo</th>
                 <th className="p-4 text-left">Identité</th>
                 <th className="p-4 text-left">N° Adhérent</th>
                 <th className="p-4 text-left">Région</th>
@@ -98,13 +96,21 @@ export default function PraticiensPage() {
           </table>
         </div>
 
-        {/* VUE CARDS (Mobile) */}
         <div className="md:hidden divide-y divide-gray-100">
           {filtered.map(p => (
             <div key={p.id} className="p-4 flex justify-between items-center">
-              <div>
-                <p className="font-bold text-gray-900">{p.nom} {p.prenom}</p>
-                <p className="text-xs text-gray-500 font-mono mt-0.5">{p.numero_adherent}</p>
+              <div className="flex items-center gap-3">
+                {p.photo_url ? (
+                  <img src={p.photo_url} alt="" className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
+                    <User size={20} />
+                  </div>
+                )}
+                <div>
+                  <p className="font-bold text-gray-900">{p.nom} {p.prenom}</p>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5">{p.numero_adherent}</p>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge statut={p.statut} />
@@ -118,7 +124,6 @@ export default function PraticiensPage() {
   )
 }
 
-/* COMPOSANTS UI */
 function StatusBadge({ statut }) {
   const config = {
     certifie: "bg-green-50 text-green-700 border-green-200",
@@ -132,12 +137,21 @@ function StatusBadge({ statut }) {
 function PraticienRow({ p, onSelect }) {
   return (
     <tr className="hover:bg-gray-50">
+      <td className="p-4">
+        {p.photo_url ? (
+          <img src={p.photo_url} alt="" className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
+            <User size={20} />
+          </div>
+        )}
+      </td>
       <td className="p-4 font-semibold">{p.nom} {p.prenom}</td>
       <td className="p-4 font-mono text-indigo-600 text-xs">{p.numero_adherent}</td>
       <td className="p-4 text-gray-600">{p.region}</td>
       <td className="p-4"><StatusBadge statut={p.statut} /></td>
       <td className="p-4 text-center">
-        <button onClick={() => onSelect(p)} className="p-1.5 hover:bg-gray-200 rounded-lg"><Eye size={16} /></button>
+        <button onClick={() => onSelect(p)} className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600"><Eye size={16} /></button>
       </td>
     </tr>
   )

@@ -1,22 +1,11 @@
 import { useState } from "react"
 import { supabase } from "../../services/supabase"
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Stethoscope,
-  Camera,
-  FileImage,
-  FileText,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  FolderOpen,
-  UserCheck
+  User, Mail, Phone, MapPin, Stethoscope, Camera, 
+  FileImage, FileText, Loader2, CheckCircle2, AlertCircle, 
+  FolderOpen, UserCheck
 } from "lucide-react"
 
-// Liste officielle des 13 régions du Burkina Faso
 const REGIONS_BF = [
   "Boucle du Mouhoun", "Cascades", "Centre", "Centre-Est", "Centre-Nord", 
   "Centre-Ouest", "Centre-Sud", "Est", "Hauts-Bassins", "Nord", 
@@ -25,279 +14,114 @@ const REGIONS_BF = [
 
 export default function PraticienForm({ onSuccess }) {
   const [form, setForm] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-    telephone: "",
-    region: "",
-    specialite: "",
-    statut: "en_attente",
-    reseau_id: "",
-    association_id: ""
+    nom: "", prenom: "", email: "", telephone: "", 
+    region: "", specialite: "", statut: "en_attente"
   })
 
-  const [files, setFiles] = useState({
-    photo: null,
-    cni_recto: null,
-    cni_verso: null,
-    diplome: null
-  })
-
+  const [files, setFiles] = useState({ photo: null, cni_recto: null, cni_verso: null, diplome: null })
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState({ type: "", text: "" }) // { type: 'success' | 'error', text: '' }
+  const [status, setStatus] = useState({ type: "", text: "" })
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleFileChange = (name, file) => {
-    setFiles({ ...files, [name]: file })
-  }
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handleFileChange = (name, file) => setFiles({ ...files, [name]: file })
 
   const uploadFile = async (file, folder) => {
     if (!file) return null
-    const fileName = `${Date.now()}-${file.name}`
-
-    const { error } = await supabase.storage
-      .from("documents-praticiens")
-      .upload(`${folder}/${fileName}`, file)
-
+    const { data, error } = await supabase.storage.from("documents-praticiens").upload(`${folder}/${Date.now()}-${file.name}`, file)
     if (error) throw error
-
-    const { data } = supabase.storage
-      .from("documents-praticiens")
-      .getPublicUrl(`${folder}/${fileName}`)
-
-    return data.publicUrl
+    return supabase.storage.from("documents-praticiens").getPublicUrl(data.path).data.publicUrl
   }
-
-  const generateNumero = () => "FNSTHS-" + Date.now().toString().slice(-8)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setStatus({ type: "", text: "" })
-
     try {
-      const numero_adherent = generateNumero()
-
-      const photo_url = await uploadFile(files.photo, "photos")
-      const cni_recto_url = await uploadFile(files.cni_recto, "cni")
-      const cni_verso_url = await uploadFile(files.cni_verso, "cni")
-      const diplome_url = await uploadFile(files.diplome, "diplomes")
-
-      const { error } = await supabase.from("praticiens").insert([
-        {
-          nom: form.nom,
-          prenom: form.prenom,
-          email: form.email,
-          telephone: form.telephone,
-          region: form.region,
-          specialite: form.specialite,
-          statut: form.statut,
-          reseau_id: form.reseau_id || null,
-          association_id: form.association_id || null,
-          numero_adherent,
-          photo: photo_url,
-          cni_recto: cni_recto_url,
-          cni_verso: cni_verso_url,
-          diplome: diplome_url,
-          created_at: new Date().toISOString()
-        }
+      const [photo, cni_r, cni_v, diplome] = await Promise.all([
+        uploadFile(files.photo, "photos"),
+        uploadFile(files.cni_recto, "cni"),
+        uploadFile(files.cni_verso, "cni"),
+        uploadFile(files.diplome, "diplomes")
       ])
 
+      const { error } = await supabase.from("praticiens").insert([{
+        ...form,
+        numero_adherent: "FNSTHS-" + Date.now().toString().slice(-8),
+        photo, cni_recto: cni_r, cni_verso: cni_v, diplome
+      }])
+
       if (error) throw error
-
-      setStatus({ type: "success", text: "Praticien enregistré avec succès !" })
-
-      setForm({
-        nom: "", prenom: "", email: "", telephone: "", region: "",
-        specialite: "", statut: "en_attente", reseau_id: "", association_id: ""
-      })
-
-      setFiles({ photo: null, cni_recto: null, cni_verso: null, diplome: null })
-
-      if (onSuccess) setTimeout(() => onSuccess(), 1500)
+      setStatus({ type: "success", text: "Enregistré avec succès !" })
+      if (onSuccess) setTimeout(onSuccess, 1500)
     } catch (err) {
-      console.error(err)
-      setStatus({ type: "error", text: "Erreur lors de l'enregistrement ou du téléversement." })
+      setStatus({ type: "error", text: "Erreur lors de l'enregistrement." })
     }
     setLoading(false)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl mx-auto">
-      
-      {/* HEADER */}
-      <div>
-        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <Stethoscope className="text-indigo-600 w-5 h-5" />
-          Création d’un Praticien
-        </h3>
-        <p className="text-xs text-gray-500">
-          Ajout des informations professionnelles et des pièces justificatives obligatoires.
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="mb-2">
+        <h3 className="text-lg font-bold text-gray-800">Nouveau Praticien</h3>
       </div>
 
-      {/* Alert Banner */}
       {status.text && (
-        <div className={`p-3.5 rounded-lg flex items-center gap-2.5 text-sm font-medium border ${
-          status.type === "success" 
-            ? "bg-green-50 text-green-700 border-green-200" 
-            : "bg-red-50 text-red-700 border-red-200"
-        }`}>
-          {status.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span>{status.text}</span>
+        <div className={`p-3 rounded-lg flex items-center gap-2 text-xs font-medium border ${status.type === "success" ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"}`}>
+          {status.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+          {status.text}
         </div>
       )}
 
-      {/* INFORMATIONS PERSONNELLES */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Input label="Nom" name="nom" value={form.nom} onChange={handleChange} icon={<User size={14} />} />
+        <Input label="Prénom" name="prenom" value={form.prenom} onChange={handleChange} icon={<User size={14} />} />
+        <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} icon={<Mail size={14} />} />
+        <Input label="Téléphone" name="telephone" value={form.telephone} onChange={handleChange} icon={<Phone size={14} />} />
+        <Input label="Spécialité" name="specialite" value={form.specialite} onChange={handleChange} icon={<Stethoscope size={14} />} />
         
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Nom</label>
-          <Input required icon={<User size={16} />} name="nom" value={form.nom} placeholder="Nom" onChange={handleChange} />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Prénom(s)</label>
-          <Input required icon={<User size={16} />} name="prenom" value={form.prenom} placeholder="Prénom" onChange={handleChange} />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Email</label>
-          <Input required type="email" icon={<Mail size={16} />} name="email" value={form.email} placeholder="adresse@email.com" onChange={handleChange} />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Téléphone</label>
-          <Input required icon={<Phone size={16} />} name="telephone" value={form.telephone} placeholder="+226 XX XX XX XX" onChange={handleChange} />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Spécialité médicale</label>
-          <Input required icon={<Stethoscope size={16} />} name="specialite" value={form.specialite} placeholder="Ex: Infirmier d'État, Généraliste" onChange={handleChange} />
-        </div>
-
-        {/* REGION SELECT */}
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-600">Région d'exercice</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
-            <select required name="region" value={form.region} onChange={handleChange}
-              className="pl-9 pr-3 py-2 border border-gray-300 w-full rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none"
-            >
-              <option value="" disabled hidden>Sélectionner la région</option>
-              {REGIONS_BF.map((r, i) => <option key={i} value={r}>{r}</option>)}
-            </select>
-          </div>
-        </div>
-
-      </div>
-
-      {/* SECTION PHOTO ET PIÈCES JOINTES */}
-      <div className="pt-2 border-t border-gray-100">
-        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Documents & Justificatifs</label>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          
-          {/* PHOTO MOBILE / PORTRAIT */}
-          <div className="sm:col-span-2">
-            <FileInput 
-              label="Photo portrait du praticien" 
-              name="photo" 
-              file={files.photo}
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange} 
-              icon={<Camera size={16} />} 
-            />
-          </div>
-
-          <FileInput label="CNI (Recto)" name="cni_recto" file={files.cni_recto} onChange={handleFileChange} icon={<FileImage size={16} />} />
-          <FileInput label="CNI (Verso)" name="cni_verso" file={files.cni_verso} onChange={handleFileChange} icon={<FileImage size={16} />} />
-          
-          <div className="sm:col-span-2">
-            <FileInput label="Copie du Diplôme principal" name="diplome" file={files.diplome} onChange={handleFileChange} icon={<FileText size={16} />} />
-          </div>
-
-        </div>
-      </div>
-
-      {/* STATUT DE VALIDATION */}
-      <div className="pt-2 border-t border-gray-100 space-y-1">
-        <label className="text-xs font-medium text-gray-600">Statut d'adhésion initial</label>
-        <div className="relative">
-          <UserCheck className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
-          <select name="statut" value={form.statut} onChange={handleChange}
-            className="pl-9 pr-3 py-2 border border-gray-300 w-full rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none"
-          >
-            <option value="en_attente">En attente de validation</option>
-            <option value="certifie">Certifié d'office</option>
-            <option value="suspendu">Suspendu</option>
+          <label className="text-[10px] font-bold text-gray-500 uppercase">Région</label>
+          <select required name="region" value={form.region} onChange={handleChange} className="w-full p-2 border rounded-lg text-sm bg-white">
+            <option value="">Choisir...</option>
+            {REGIONS_BF.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
       </div>
 
-      {/* SUBMIT BUTTON */}
-      <div className="pt-2">
-        <button
-          disabled={loading}
-          type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold w-full py-2.5 px-4 rounded-lg shadow-sm shadow-indigo-600/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin w-4 h-4" />
-              <span>Création du profil praticien...</span>
-            </>
-          ) : (
-            <span>Créer le profil praticien</span>
-          )}
-        </button>
+      <div className="space-y-2 pt-2 border-t">
+        <label className="text-[10px] font-bold text-gray-500 uppercase">Justificatifs</label>
+        <div className="grid grid-cols-2 gap-2">
+          <FileInput label="Photo" name="photo" onChange={handleFileChange} icon={<Camera size={14}/>} />
+          <FileInput label="Diplôme" name="diplome" onChange={handleFileChange} icon={<FileText size={14}/>} />
+          <FileInput label="CNI Recto" name="cni_recto" onChange={handleFileChange} icon={<FileImage size={14}/>} />
+          <FileInput label="CNI Verso" name="cni_verso" onChange={handleFileChange} icon={<FileImage size={14}/>} />
+        </div>
       </div>
 
+      <button disabled={loading} type="submit" className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+        {loading ? <Loader2 className="animate-spin" size={16} /> : "Enregistrer le praticien"}
+      </button>
     </form>
   )
 }
 
-/* ================= COMPOSANT INPUT STYLISÉ ================= */
-function Input({ icon, ...props }) {
+function Input({ label, icon, ...props }) {
   return (
-    <div className="relative">
-      <div className="absolute left-3 top-2.5 text-gray-400">
-        {icon}
+    <div className="space-y-1">
+      <label className="text-[10px] font-bold text-gray-500 uppercase">{label}</label>
+      <div className="relative">
+        <div className="absolute left-3 top-2.5 text-gray-400">{icon}</div>
+        <input {...props} required className="pl-8 w-full p-2 border rounded-lg text-sm" />
       </div>
-      <input
-        {...props}
-        className="pl-9 pr-3 py-2 border border-gray-300 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-      />
     </div>
   )
 }
 
-/* ================= COMPOSANT FILE INPUT DESIGNED ================= */
-function FileInput({ label, name, file, onChange, icon, ...extraProps }) {
+function FileInput({ label, name, onChange, icon }) {
   return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
-        {icon} {label}
-      </label>
-      <label className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-3 cursor-pointer transition-colors text-center ${
-        file ? 'border-indigo-500 bg-indigo-50/10' : 'border-gray-200 hover:bg-gray-50'
-      }`}>
-        <FolderOpen size={16} className={file ? "text-indigo-600" : "text-gray-400"} />
-        <span className="text-xs font-medium mt-1 text-gray-700 truncate max-w-xs">
-          {file ? file.name : "Parcourir le fichier"}
-        </span>
-        <input 
-          type="file" 
-          name={name} 
-          onChange={(e) => onChange(name, e.target.files[0])} 
-          className="hidden" 
-          {...extraProps}
-        />
-      </label>
-    </div>
+    <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-2 cursor-pointer hover:bg-gray-50">
+      <div className="text-gray-400">{icon}</div>
+      <span className="text-[10px] font-medium text-gray-600 mt-1">{label}</span>
+      <input type="file" onChange={(e) => onChange(name, e.target.files[0])} className="hidden" />
+    </label>
   )
 }

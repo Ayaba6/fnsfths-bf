@@ -26,7 +26,6 @@ export default function CarteList() {
     fetchPraticiens()
   }, [])
 
-  // CORRECTION ICI : "regionsUniques" en un seul mot
   const regionsUniques = [...new Set(praticiens.map((p) => p.region).filter(Boolean))]
 
   // Logique de filtrage
@@ -135,32 +134,45 @@ export default function CarteList() {
                 </span>
               </div>
 
-              {/* 🗂️ ZONE APERÇU MINIATURES RECTO / VERSO */}
+              {/* 🗂️ APERÇU MINIATURES RETOUCHÉ POUR CORRESPONDRE AU NOUVEAU DESIGN */}
               <div className="grid grid-cols-2 gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-100 my-2">
                 
-                {/* Mini Recto */}
-                <div className="aspect-[1.58/1] bg-white border border-gray-200 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden shadow-xs">
+                {/* Mini Recto (En-tête centré + mini trait vert) */}
+                <div className="aspect-[1.58/1] bg-gradient-to-br from-white via-gray-50 to-green-50/20 border border-gray-200 rounded-lg p-1.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-green-600"></div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-5 h-6 bg-gray-100 rounded object-cover border shrink-0 overflow-hidden">
-                      {p.photo && <img src={p.photo} className="w-full h-full object-cover" alt="" />}
+                  
+                  {/* Mini Header Centré */}
+                  <div className="text-center scale-[0.6] origin-top mt-0.5 leading-none">
+                    <div className="text-[7px] font-black text-green-700 uppercase tracking-tighter">Burkina Faso</div>
+                    <div className="w-4 h-[0.5px] bg-green-600 mx-auto mt-[1px]"></div>
+                  </div>
+
+                  {/* Corps (Photo élargie & décalée + Nom) */}
+                  <div className="flex items-center gap-2 px-1 mt-1 flex-1">
+                    <div className="w-5 h-6 bg-gray-100 rounded object-cover border shrink-0 overflow-hidden shadow-2xs">
+                      {p.photo ? (
+                        <img src={p.photo} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200" />
+                      )}
                     </div>
-                    <div className="scale-[0.6] origin-left whitespace-nowrap leading-none text-gray-800 font-bold uppercase">
+                    <div className="scale-[0.6] origin-left whitespace-nowrap leading-tight text-gray-900 font-bold uppercase truncate max-w-[55px]">
                       {p.nom}
                     </div>
                   </div>
-                  <div className="text-[6px] text-gray-400 font-mono truncate">{p.numero_adherent}</div>
+                  <div className="text-[5px] text-gray-400 font-mono px-1 truncate">{p.numero_adherent || "N/A"}</div>
                 </div>
 
-                {/* Mini Verso */}
-                <div className="aspect-[1.58/1] bg-gray-800 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden shadow-xs">
-                  <div className="space-y-0.5 scale-[0.65] origin-top-left w-[150%]">
-                    <div className="text-[7px] text-green-400 font-bold uppercase tracking-tighter">VERSO OFFICIEL</div>
-                    <div className="h-0.5 bg-gray-700 w-full"></div>
-                    <div className="text-[5px] text-gray-400 leading-tight">Carte soumise aux règlements fédéraux.</div>
+                {/* Mini Verso (Adapté au nouveau style clair et épuré) */}
+                <div className="aspect-[1.58/1] bg-gradient-to-br from-white via-gray-50 to-green-50/10 border border-gray-200 rounded-lg p-1.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+                  <div className="space-y-0.5 scale-[0.6] origin-top-left w-[160%]">
+                    <div className="text-[7px] text-green-700 font-bold uppercase tracking-tighter border-b border-green-600 pb-[1px]">VERSO OFFICIEL</div>
+                    <div className="text-[4.5px] text-gray-500 leading-tight">1. Carte strictement personnelle.</div>
+                    <div className="text-[4.5px] text-gray-500 leading-tight">2. Scannez le QR pour contrôle.</div>
                   </div>
-                  <div className="w-full flex justify-end">
-                    <div className="w-6 h-3 border border-dashed border-gray-600 rounded bg-white/5"></div>
+                  <div className="w-full flex justify-between items-end scale-[0.65] origin-bottom-left w-[150%]">
+                    <div className="text-[4.5px] text-gray-400">Ouagadougou</div>
+                    <div className="w-6 h-3 border border-dashed border-green-600/40 rounded bg-green-50/20"></div>
                   </div>
                 </div>
 

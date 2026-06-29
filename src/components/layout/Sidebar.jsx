@@ -8,7 +8,6 @@ import {
   CreditCard,
   Settings,
   LogOut,
-  Shield,
   X
 } from "lucide-react"
 
@@ -54,15 +53,19 @@ export default function Sidebar({ role, onClose }) {
         </button>
       )}
 
-      {/* ================= HEADER ================= */}
-      {/* Modification : Remplacement de h-20 par un padding vertical py-5 pour accueillir le texte sur deux lignes */}
+      {/* ================= HEADER AVEC LOGO ================= */}
       <div className="px-5 py-5 border-b border-gray-100 flex flex-col justify-center">
-        <h1 className="text-xl font-bold flex items-center gap-2 text-gray-800">
-          <Shield className="text-green-600 w-6 h-6" />
-          <span>FNSTHS</span>
-        </h1>
-        {/* Correction ici : retrait de 'truncate', ajout de 'leading-tight' pour un retour à la ligne propre */}
-        <p className="text-xs text-gray-400 mt-1 font-medium leading-tight">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/logo192.png" 
+            alt="Logo FNSFTHS" 
+            className="w-9 h-9 object-contain rounded-lg" 
+          />
+          <h1 className="text-xl font-bold text-gray-800 tracking-tight">
+            FNSFTHS
+          </h1>
+        </div>
+        <p className="text-xs text-gray-400 mt-3 font-medium leading-tight uppercase tracking-wider">
           {safeRole === "admin_federation" && "Administration Fédération"}
           {safeRole === "reseau" && "Espace Réseau"}
           {safeRole === "association" && "Espace Association"}

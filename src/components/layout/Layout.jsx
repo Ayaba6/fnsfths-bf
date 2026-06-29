@@ -50,7 +50,7 @@ export default function Layout({ children }) {
 
       {/* ================= MOBILE HEADER ================= */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b px-4 flex items-center justify-between z-50 shadow-sm">
-        <h1 className="font-bold text-green-600">FNSTHS</h1>
+        <h1 className="font-bold text-green-600">FNSFTHS</h1>
         <button 
           onClick={() => setOpen(!open)}
           className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
