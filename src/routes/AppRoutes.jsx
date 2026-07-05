@@ -1,13 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
+// 🔥 PAGES PUBLIQUES
+import LandingPage from "../pages/public/LandingPage"
+import PublicPage from "../pages/public/PublicPage"
+import About from "../pages/public/About"
+import Contact from "../pages/public/Contact"
 import Login from "../pages/auth/Login"
+
 import ProtectedRoute from "./ProtectedRoute"
 import Layout from "../components/layout/Layout"
 
-// 🔥 ADMIN & MUTUALISÉS (ADMIN / RESEAU / ASSOCIATION)
+// 🔥 ADMIN & MUTUALISÉS
 import AdminDashboard from "../pages/admin/AdminDashboard"
-import PraticiensPage from "../pages/admin/PraticiensPage"       // 👈 Mutualisé Admin, Réseau, Association
-import AssociationsPage from "../pages/admin/AssociationsPage" // 👈 Mutualisé Admin et Réseau
+import PraticiensPage from "../pages/admin/PraticiensPage"
+import AssociationsPage from "../pages/admin/AssociationsPage"
 import ReseauxPage from "../pages/admin/ReseauxPage"
 
 // 🔥 RESEAUX
@@ -25,8 +31,12 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
 
-        {/* ================= LOGIN ================= */}
-        <Route path="/" element={<Login />} />
+        {/* ================= PUBLIC ================= */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/annuaire" element={<PublicPage />} />
+        <Route path="/a-propos" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
 
         {/* ================= ADMIN ================= */}
         <Route
@@ -85,7 +95,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ✅ ROUTE RÉSEAU PRATICIENS DYNAMIQUE */}
         <Route
           path="/reseau/praticiens"
           element={
@@ -97,7 +106,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ✅ ROUTE RÉSEAU ASSOCIATIONS MUTUALISÉE */}
         <Route
           path="/reseau/associations"
           element={
@@ -121,7 +129,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ✅ ROUTE ASSOCIATION PRATICIENS DYNAMIQUE */}
         <Route
           path="/association/praticiens"
           element={
