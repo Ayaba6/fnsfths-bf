@@ -3,7 +3,7 @@ import { Sprout, Beaker, Users, ShieldCheck, ArrowRight } from "lucide-react"
 import PublicHeader from "./layout/PublicHeader"
 import PublicFooter from "./layout/PublicFooter"
 import heroImage from "../../assets/hero-medicine.jpg"
-import logoImage from "../../assets/logo.jpg"
+import logoImage from "../../assets/logo.JPG"
 
 export default function LandingPage() {
   const axes = [
