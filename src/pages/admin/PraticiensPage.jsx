@@ -48,21 +48,14 @@ export default function PraticiensPage() {
     }
   }
 
-  // --- Fonction mise à jour pour réactivité immédiate ---
   const updateStatut = async (id, nouveauStatut) => {
-    // 1. Mise à jour immédiate de l'affichage dans la liste
     setPraticiens(prev => prev.map(p => p.id === id ? { ...p, statut: nouveauStatut } : p));
+    if (selected && selected.id === id) setSelected(prev => ({ ...prev, statut: nouveauStatut }));
     
-    // 2. Mise à jour immédiate de la modale ouverte
-    if (selected && selected.id === id) {
-      setSelected(prev => ({ ...prev, statut: nouveauStatut }));
-    }
-
-    // 3. Mise à jour dans Supabase
     const { error } = await supabase.from("praticiens").update({ statut: nouveauStatut }).eq("id", id);
     if (error) {
         alert("Erreur lors de la mise à jour");
-        fetchData(); // En cas d'erreur, on recharge les données réelles
+        fetchData(); 
     }
   }
 
@@ -79,7 +72,6 @@ export default function PraticiensPage() {
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900">👨‍⚕️ Gestion des Praticiens</h1>
 
-      {/* FILTRES */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-gray-50">
           <Search size={16} className="text-gray-400" />
@@ -97,11 +89,11 @@ export default function PraticiensPage() {
         </select>
       </div>
 
-      {/* TABLEAU */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
             <tr>
+              <th className="p-4">Photo</th>
               <th className="p-4">Identité</th>
               <th className="p-4">N° Adhérent</th>
               <th className="p-4">Région</th>
@@ -112,6 +104,11 @@ export default function PraticiensPage() {
           <tbody className="divide-y divide-gray-100">
             {filtered.map(p => (
               <tr key={p.id} className="hover:bg-gray-50">
+                <td className="p-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-300 flex items-center justify-center">
+                    {p.photo ? <img src={p.photo} alt="miniature" className="w-full h-full object-cover" /> : <span className="text-[10px] text-gray-500">N/A</span>}
+                  </div>
+                </td>
                 <td className="p-4 font-semibold">{p.nom} {p.prenom}</td>
                 <td className="p-4 font-mono text-indigo-600">{p.numero_adherent}</td>
                 <td className="p-4">{p.region}</td>
@@ -126,7 +123,6 @@ export default function PraticiensPage() {
         </table>
       </div>
 
-      {/* MODALE DE DÉTAILS */}
       {selected && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelected(null)}>
           <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -154,16 +150,16 @@ export default function PraticiensPage() {
               </div>
 
               <div className="flex flex-col items-center justify-center">
-                <div className="w-full max-w-[250px] aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-inner">
+                <div className="w-32 h-32 bg-gray-100 rounded-full overflow-hidden border-4 border-gray-50 flex items-center justify-center shadow-md mb-4">
                   {selected.photo ? (
                     <img src={selected.photo} alt="Praticien" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-gray-400 text-sm">Aucune photo</span>
+                    <span className="text-gray-400 text-xs">Photo</span>
                   )}
                 </div>
-                <div className="flex gap-3 mt-6">
-                  <button onClick={() => updateStatut(selected.id, "certifie")} className="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-green-700 transition-colors shadow-sm">Certifier</button>
-                  <button onClick={() => updateStatut(selected.id, "suspendu")} className="bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors shadow-sm">Suspendre</button>
+                <div className="flex gap-3 mt-4">
+                  <button onClick={() => updateStatut(selected.id, "certifie")} className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition-colors shadow-sm">Certifier</button>
+                  <button onClick={() => updateStatut(selected.id, "suspendu")} className="bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors shadow-sm">Suspendre</button>
                 </div>
               </div>
             </div>
