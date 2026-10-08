@@ -1,4 +1,16 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
+import { useEffect } from "react"
+
+// 🔥 COMPOSANT SCROLL TO TOP
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
 
 // 🔥 PAGES PUBLIQUES
 import LandingPage from "../pages/public/LandingPage"
@@ -29,6 +41,7 @@ import CartePDF from "../pages/praticiens/CartePDF"
 export default function AppRoutes() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
 
         {/* ================= PUBLIC ================= */}
