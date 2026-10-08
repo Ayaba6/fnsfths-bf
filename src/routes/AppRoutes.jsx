@@ -27,6 +27,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard"
 import PraticiensPage from "../pages/admin/PraticiensPage"
 import AssociationsPage from "../pages/admin/AssociationsPage"
 import ReseauxPage from "../pages/admin/ReseauxPage"
+import AttestationManager from "../pages/admin/AttestationManager" // 👈 Import du composant Attestation
 
 // 🔥 RESEAUX
 import ReseauDashboard from "../pages/reseau/ReseauDashboard"
@@ -153,7 +154,7 @@ export default function AppRoutes() {
           }
         />
 
-        {/* ================= CARTES ================= */}
+        {/* ================= CARTES & ATTESTATIONS ================= */}
         <Route
           path="/admin/praticiens/carte"
           element={
@@ -171,6 +172,17 @@ export default function AppRoutes() {
             <ProtectedRoute allowedRoles={["admin_federation"]}>
               <Layout>
                 <CartePDF />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/attestations"
+          element={
+            <ProtectedRoute allowedRoles={["admin_federation"]}>
+              <Layout>
+                <AttestationManager />
               </Layout>
             </ProtectedRoute>
           }

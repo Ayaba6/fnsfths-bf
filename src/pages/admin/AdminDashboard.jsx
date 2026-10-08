@@ -11,7 +11,8 @@ import {
   Plus,
   X,
   MapPin,
-  Menu
+  Menu,
+  Search
 } from "lucide-react"
 
 import ReseauForm from "../../components/modal/ReseauForm"
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
   const [modalType, setModalType] = useState("reseau")
   const [mobileMenu, setMobileMenu] = useState(false)
   const [regionFilter, setRegionFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
 
   const [stats, setStats] = useState({
     praticiens: 0,
@@ -77,15 +79,14 @@ export default function AdminDashboard() {
         suspendus: praticiens.filter(p => p.statut === "suspendu").length
       })
 
-      const filtered =
+      const filteredByRegion =
         regionFilter === "all"
           ? praticiens
           : praticiens.filter(p => p.region === regionFilter)
 
       setRecentPraticiens(
-        filtered
+        filteredByRegion
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5)
       )
     } catch (err) {
       console.error(err)
@@ -97,6 +98,14 @@ export default function AdminDashboard() {
     fetchData()
   }, [regionFilter])
 
+  // Filtrage par recherche textuelle (nom, prénom ou numéro)
+  const filteredPraticiens = recentPraticiens.filter(p => {
+    const query = searchTerm.toLowerCase()
+    const fullName = `${p.nom || ""} ${p.prenom || ""}`.toLowerCase()
+    const numero = (p.numero_adherent || "").toLowerCase()
+    return fullName.includes(query) || numero.includes(query)
+  }).slice(0, 5)
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-medium">
@@ -106,7 +115,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
       
       {/* ================= HEADER ================= */}
       <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -123,7 +132,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* ================= MOBILE MENU ================= */}
+      {/* ================= MOBILE MENU (Actions rapides) ================= */}
       {mobileMenu && (
         <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileMenu(false)}>
           <div className="absolute top-20 right-4 left-4 bg-white p-4 rounded-xl border shadow-xl space-y-2" onClick={(e) => e.stopPropagation()}>
@@ -156,18 +165,30 @@ export default function AdminDashboard() {
         <CarteBurkina selected={regionFilter} onSelect={setRegionFilter} stats={regionStats} />
       </div>
 
-      {/* ================= LISTE PRATICIENS (REFACTO) ================= */}
+      {/* ================= LISTE PRATICIENS ================= */}
       <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-4 md:p-5 border-b flex justify-between items-center">
+        <div className="p-4 md:p-5 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="font-bold text-gray-800 flex items-center gap-2">
             <MapPin size={18} className="text-gray-500" /> Derniers praticiens
           </h2>
+          
+          {/* BARRE DE RECHERCHE RAPIDE */}
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Rechercher par nom, numéro..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-600 focus:bg-white transition-all text-gray-800"
+            />
+          </div>
         </div>
         
         {/* VUE TABLEAU (DESKTOP) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500">
+            <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
               <tr>
                 <th className="py-3 px-4">Nom</th>
                 <th className="py-3 px-4">Numéro</th>
@@ -176,22 +197,36 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {recentPraticiens.map((p) => <PraticienRow key={p.id} p={p} />)}
+              {filteredPraticiens.length > 0 ? (
+                filteredPraticiens.map((p) => <PraticienRow key={p.id} p={p} />)
+              ) : (
+                <tr>
+                  <td colSpan="4" className="py-6 text-center text-gray-400 text-xs">
+                    Aucun praticien trouvé.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* VUE CARDS (MOBILE) */}
         <div className="md:hidden divide-y divide-gray-100">
-          {recentPraticiens.map((p) => (
-            <div key={p.id} className="p-4 flex justify-between items-center hover:bg-gray-50">
-              <div>
-                <p className="font-bold text-gray-800">{p.nom} {p.prenom}</p>
-                <p className="text-xs text-gray-500">{p.region} • <span className="font-mono text-green-600">{p.numero_adherent}</span></p>
+          {filteredPraticiens.length > 0 ? (
+            filteredPraticiens.map((p) => (
+              <div key={p.id} className="p-4 flex justify-between items-center hover:bg-gray-50">
+                <div>
+                  <p className="font-bold text-gray-800">{p.nom} {p.prenom}</p>
+                  <p className="text-xs text-gray-500">{p.region} • <span className="font-mono text-green-600">{p.numero_adherent}</span></p>
+                </div>
+                <StatutBadge statut={p.statut} />
               </div>
-              <StatutBadge statut={p.statut} />
+            ))
+          ) : (
+            <div className="py-6 text-center text-gray-400 text-xs">
+              Aucun praticien trouvé.
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -207,20 +242,20 @@ export default function AdminDashboard() {
 /* ================= SOUS-COMPOSANTS ================= */
 
 function StatutBadge({ statut }) {
-  const base = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border";
+  const base = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border";
   const colors = {
     certifie: 'bg-green-50 text-green-700 border-green-200',
     en_attente: 'bg-amber-50 text-amber-700 border-amber-200',
     suspendu: 'bg-red-50 text-red-700 border-red-200'
   };
-  return <span className={`${base} ${colors[statut] || 'bg-gray-50'}`}>{statut}</span>;
+  return <span className={`${base} ${colors[statut] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>{statut}</span>;
 }
 
 function PraticienRow({ p }) {
   return (
-    <tr className="hover:bg-gray-50/70">
+    <tr className="hover:bg-gray-50/70 transition-colors">
       <td className="py-3.5 px-4 font-medium text-gray-800">{p.nom} {p.prenom}</td>
-      <td className="py-3.5 px-4 text-green-700 font-semibold">{p.numero_adherent}</td>
+      <td className="py-3.5 px-4 text-green-700 font-semibold font-mono">{p.numero_adherent}</td>
       <td className="py-3.5 px-4 text-gray-600">{p.region}</td>
       <td className="py-3.5 px-4"><StatutBadge statut={p.statut} /></td>
     </tr>
@@ -230,8 +265,8 @@ function PraticienRow({ p }) {
 function Modal({ children, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white w-full max-w-2xl rounded-xl relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <button className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100" onClick={onClose}><X size={20} /></button>
+      <div className="bg-white w-full max-w-2xl rounded-2xl relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <button className="absolute top-4 right-4 p-1.5 rounded-xl text-gray-400 hover:bg-gray-100 transition-colors" onClick={onClose}><X size={20} /></button>
         <div className="p-6">{children}</div>
       </div>
     </div>
@@ -247,7 +282,7 @@ function CreateForm({ type, onSuccess }) {
 
 function StatCard({ icon, title, value }) {
   return (
-    <div className="bg-white p-4 rounded-xl border shadow-sm flex flex-col gap-1">
+    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-1 hover:border-gray-200 transition-all">
       <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">{icon} {title}</div>
       <div className="text-xl font-bold text-gray-800">{value}</div>
     </div>
