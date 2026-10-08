@@ -13,11 +13,25 @@
     <link rel="apple-touch-icon" href="/logo192.png" />
     
     <meta name="theme-color" content="#16a34a" />
+
+    <!-- 1. AJOUT DU CSS AOS POUR LES ANIMATIONS AU SCROLL -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <title>FNSFTHS-BF</title>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- 2. AJOUT DU SCRIPT AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+      // Initialisation de l'effet dynamique au scroll
+      AOS.init({
+        duration: 800, // Durée de l'animation en millisecondes
+        once: true,    // L'animation ne se joue qu'une seule fois par section lors du scroll
+        offset: 100,   // Déclenche l'animation un peu avant que l'élément n'apparaisse entièrement
+      });
+    </script>
 
     <script type="module" src="/src/main.jsx"></script>
   </body>

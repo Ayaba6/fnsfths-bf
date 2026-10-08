@@ -7,16 +7,23 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Ajoute 'serif' comme option par défaut pour les titres élégants
-        // Assurez-vous d'importer la police dans votre fichier CSS principal ou index.html
         serif: ['"Playfair Display"', 'serif'],
-        sans: ['Inter', 'sans-serif'], // Vous pouvez garder une police sans-serif pour le reste du texte
+        sans: ['Inter', 'sans-serif'],
       },
       colors: {
-        // Ajout des couleurs personnalisées pour correspondre à "Capture.PNG"
         tradition: {
-          green: '#15803d', // Vert pour Tradipraticiens
-          gold: '#ca8a04',  // Jaune/Or pour Herboristes
+          green: '#15803d',
+          gold: '#ca8a04',
+        },
+      },
+      // Ajout des configurations pour le défilement infini
+      animation: {
+        marquee: 'marquee 25s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },
