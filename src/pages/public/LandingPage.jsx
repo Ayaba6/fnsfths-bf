@@ -63,9 +63,9 @@ export default function LandingPage() {
                 <Sprout size={16} className="text-yellow-400 animate-bounce" /> Burkina Faso • Reconnaissance Officielle
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold mb-6 leading-tight tracking-tight">
-                Fédération Nationale des <br/>
-                <span className="text-yellow-400 drop-shadow-sm">Tradipraticiens</span> et <span className="text-green-300">Herboristes</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold mb-6 leading-tight tracking-tight">
+                Fédération Nationale <span className="text-yellow-400">Sans Frontière</span> des <br/>
+                <span className="text-yellow-400 drop-shadow-sm">Tradipraticiens</span> et <span className="text-green-300">Herboristes</span> de Santé
               </h1>
               
               <p className="text-base sm:text-lg text-slate-200 mb-8 leading-relaxed max-w-2xl font-light">
@@ -119,7 +119,7 @@ export default function LandingPage() {
                 Allier la sagesse des ancêtres aux exigences de la <span className="text-green-700">santé moderne</span>
               </h2>
               <p className="text-slate-600 mb-8 leading-relaxed font-light">
-                La FNSFTHS rassemble les acteurs de la pharmacopée traditionnelle pour structurer la profession, garantir la traçabilité des soins et protéger la biodiversité végétale du pays.
+                La Fédération Nationale Sans Frontière des Tradipraticiens et Herboristes de Santé rassemble les acteurs de la pharmacopée traditionnelle pour structurer la profession, garantir la traçabilité des soins et protéger la biodiversité végétale du pays.
               </p>
               
               <div className="grid sm:grid-cols-2 gap-4">
@@ -141,9 +141,9 @@ export default function LandingPage() {
               <div className="absolute w-72 h-72 bg-green-100 rounded-full blur-3xl opacity-70 -z-10 animate-pulse"></div>
               <div className="bg-white border border-slate-100 shadow-2xl rounded-3xl p-8 max-w-md text-center transform transition-all duration-500 hover:scale-[1.02]">
                 <div className="w-24 h-24 mx-auto mb-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center p-2 shadow-inner">
-                  <img src={logoImage} alt="Logo FNSFTHS" className="w-full h-full object-contain rounded-xl" />
+                  <img src={logoImage} alt="Logo FNSFTHSB" className="w-full h-full object-contain rounded-xl" />
                 </div>
-                <h3 className="font-serif font-bold text-xl text-slate-900 mb-2">FNSFTHS</h3>
+                <h3 className="font-serif font-bold text-xl text-slate-900 mb-2">FNSFTHS-BF</h3>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6">
                   Garant de la déontologie et de la promotion des tradipraticiens et herboristes reconnus au Burkina Faso.
                 </p>
@@ -221,13 +221,10 @@ export default function LandingPage() {
           </div>
 
           <div className="relative w-full overflow-hidden flex items-center">
-            {/* Dégradés latéraux pour estomper les bords du carrousel */}
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-100 to-transparent z-10 pointer-events-none"></div>
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-100 to-transparent z-10 pointer-events-none"></div>
 
-            {/* Conteneur défilant en boucle avec la classe Tailwind et pause au survol */}
             <div className="flex w-max animate-marquee gap-8 px-4 items-center hover:[animation-play-state:paused]">
-              {/* On triple la liste pour assurer une boucle infinie ultra fluide */}
               {[...partners, ...partners, ...partners].map((partner, index) => (
                 <div 
                   key={index}

@@ -184,7 +184,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Téléphone / Secrétariat</p>
-                    <p className="font-medium text-slate-800">+226 70 59 30 30</p>
+                    <p className="font-medium text-slate-800">+226 70 53 30 30</p>
                   </div>
                 </div>
 

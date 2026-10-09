@@ -81,7 +81,7 @@ export default function PublicFooter() {
             </li>
             <li className="flex items-center gap-3">
               <Phone size={18} className="text-green-500 flex-shrink-0" />
-              <span>+226 XX XX XX XX</span>
+              <span>+226 53 30 30</span>
             </li>
           </ul>
         </div>

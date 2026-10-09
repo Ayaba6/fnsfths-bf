@@ -72,7 +72,7 @@ export default function PublicPage() {
             {/* Texte et barre de recherche/filtre */}
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-2 text-xs font-semibold text-yellow-400 bg-green-950/60 border border-green-700/50 py-1.5 px-3.5 rounded-full mb-6 backdrop-blur-sm">
-                <Sparkles size={14} /> Annuaire Officiel FNSTHS/BF
+                <Sparkles size={14} /> Annuaire Officiel FNSFTHS/BF
               </div>
               <h1 className="text-3xl sm:text-5xl font-serif font-bold mb-4 tracking-tight">
                 Répertoire des <span className="text-yellow-400">Tradipraticiens</span> Certifiés
