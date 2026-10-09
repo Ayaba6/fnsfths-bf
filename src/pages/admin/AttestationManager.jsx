@@ -170,12 +170,13 @@ export default function AttestationManager() {
   const selectedPraticiensList = praticiens.filter(p => selectedIds.includes(p.id))
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 space-y-6">
       {/* 1. CONFIGURATION & SÉLECTION (Masqué à l'impression) */}
-      <div className="print:hidden bg-white p-6 rounded-2xl border shadow-sm space-y-6">
-        <div className="flex items-center justify-between border-b pb-4">
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <Award className="text-green-600" /> Gestion des Attestations - Modèle Officiel <span className="text-red-600 font-extrabold">FNSFTHS-BF</span>
+      <div className="print:hidden bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 gap-3">
+          <h2 className="text-base sm:text-xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+            <Award className="text-green-600 shrink-0" /> 
+            <span>Gestion des Attestations - <span className="text-red-600 font-extrabold">FNSFTHS-BF</span></span>
           </h2>
           <span className="text-xs bg-green-50 text-green-700 font-semibold px-3 py-1 rounded-full border border-green-200">
             {selectedIds.length} sélectionné(s)
@@ -183,7 +184,7 @@ export default function AttestationManager() {
         </div>
 
         {/* Ligne 1 : Type de base & Intitulé exact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-600 uppercase">Modèle de base</label>
             <select
@@ -222,7 +223,7 @@ export default function AttestationManager() {
         </div>
 
         {/* Ligne 3 : Date & Ville */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-600 uppercase">Date de délivrance</label>
             <input
@@ -248,7 +249,7 @@ export default function AttestationManager() {
         </div>
 
         {/* Ligne 4 : Signataire */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-4 border-t">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-600 uppercase">Qualité / Rôle du signataire</label>
             <select
@@ -278,7 +279,7 @@ export default function AttestationManager() {
             <input
               type="text"
               value={titreSignataire}
-              onChange={(e) => setTitresSignataire(e.target.value)}
+              onChange={(e) => setTitreSignataire(e.target.value)}
               className="w-full p-2.5 text-sm bg-gray-50 border rounded-xl outline-none focus:border-green-600"
             />
           </div>
@@ -288,7 +289,7 @@ export default function AttestationManager() {
         <div className="space-y-3 pt-4 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <label className="text-xs font-semibold text-gray-600 uppercase">Cocher les participants concernés</label>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-64">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -296,12 +297,12 @@ export default function AttestationManager() {
                   placeholder="Filtrer les participants..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-1.5 text-xs bg-gray-50 border rounded-lg outline-none focus:border-green-600"
+                  className="w-full pl-9 pr-4 py-2 text-xs bg-gray-50 border rounded-lg outline-none focus:border-green-600"
                 />
               </div>
               <button
                 onClick={handleSelectAll}
-                className="text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                className="text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg transition-colors whitespace-nowrap text-center"
               >
                 {selectedIds.length === filteredPraticiens.length ? "Tout décocher" : "Tout cocher"}
               </button>
@@ -322,13 +323,13 @@ export default function AttestationManager() {
                       isSelected ? "bg-green-50/80" : "hover:bg-gray-100"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="text-green-600">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="text-green-600 shrink-0">
                         {isSelected ? <CheckSquare size={18} /> : <Square size={18} className="text-gray-400" />}
                       </div>
-                      <div>
-                        <p className="font-semibold text-sm text-gray-800">{p.nom} {p.prenom}</p>
-                        <p className="text-xs text-gray-500">N° : <span className="font-mono text-green-700">{p.numero_adherent}</span> | Région : {p.region}</p>
+                      <div className="truncate">
+                        <p className="font-semibold text-sm text-gray-800 truncate">{p.nom} {p.prenom}</p>
+                        <p className="text-xs text-gray-500 truncate">N° : <span className="font-mono text-green-700">{p.numero_adherent}</span> | Région : {p.region}</p>
                       </div>
                     </div>
                   </div>
@@ -341,10 +342,10 @@ export default function AttestationManager() {
         </div>
 
         {selectedIds.length > 0 && (
-          <div className="print:hidden flex justify-end gap-3 pt-4">
+          <div className="print:hidden flex justify-end pt-4">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-semibold hover:bg-slate-900 shadow-md transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-semibold hover:bg-slate-900 shadow-md transition-all"
             >
               <Printer size={18} /> Imprimer en masse ({selectedIds.length})
             </button>
@@ -354,25 +355,25 @@ export default function AttestationManager() {
 
       {/* 2. APERÇU ET EXPORT */}
       {selectedPraticiensList.length > 0 ? (
-        <div className="space-y-12 flex flex-col items-center">
-          {selectedPraticiensList.map((p, index) => {
+        <div className="space-y-8 flex flex-col items-center w-full">
+          {selectedPraticiensList.map((p) => {
             const cardId = `attestation-card-${p.id}`
             return (
               <div key={p.id} className="w-full flex flex-col items-center space-y-3">
                 {/* Bouton d'export PDF individuel */}
-                <div className="print:hidden w-full max-w-[1100px] flex justify-end px-2">
+                <div className="print:hidden w-full flex justify-end px-1">
                   <button
                     onClick={() => handleExportPDF(cardId, `${p.nom}_${p.prenom}`)}
                     disabled={exportingId === cardId}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 shadow transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 shadow transition-all disabled:opacity-50"
                   >
                     <Download size={14} /> {exportingId === cardId ? "Génération du PDF..." : "Télécharger en PDF"}
                   </button>
                 </div>
 
-                {/* Conteneur visuel adapté à l'écran */}
-                <div className="w-full flex justify-center p-4 bg-slate-200/80 rounded-2xl border shadow-inner overflow-hidden">
-                  <div className="relative" style={{ width: '297mm', height: '210mm', transform: 'scale(0.7)', transformOrigin: 'top center', marginBottom: '-60mm' }}>
+                {/* Conteneur visuel hyper responsive pour mobile avec défilement horizontal si besoin */}
+                <div className="w-full overflow-x-auto p-2 sm:p-4 bg-slate-200/80 rounded-2xl border shadow-inner flex justify-center">
+                  <div className="relative shrink-0" style={{ width: '297mm', height: '210mm', transform: 'scale(0.32)', transformOrigin: 'top center', marginBottom: '-138mm', '@media (min-width: 640px)': { transform: 'scale(0.5)' }, '@media (min-width: 1024px)': { transform: 'scale(0.7)' } }}>
                     <div
                       id={cardId}
                       className="bg-white p-8 pt-6 shadow-2xl relative overflow-hidden print-page-break flex flex-col justify-between"
@@ -455,22 +456,22 @@ export default function AttestationManager() {
                         </p>
                       </div>
 
-                      {/* Bas de page : Date & Signataire avec espace généreux pour la signature et le cachet */}
-                      <div className="relative z-20 px-6 pb-4 mt-auto">
-                        <div className="border-t border-gray-200/60 pt-2 mt-1 flex justify-between items-end text-xs sm:text-sm">
+                      {/* Bas de page : Date & Signataire (sans ligne de séparation) */}
+                      <div className="relative z-20 px-6 pb-2 mt-auto">
+                        <div className="pt-2 mt-8 flex justify-between items-end text-xs sm:text-sm">
                           <div>
                             <p className="font-medium text-gray-700">
                               Fait à <span className="font-semibold text-gray-900">{lieuDelivrance}</span>, le <span className="font-semibold text-gray-900">{new Date(dateEvenement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                             </p>
                           </div>
 
-                          {/* Bloc du Signataire avec espace dédié pour la signature/cachet */}
-                          <div className="text-center px-4 py-3 bg-white/90 rounded-xl border border-amber-200/50 shadow-xs min-w-[280px]">
+                          {/* Bloc du Signataire (sans fond ni bordure, aéré pour signature/cachet) */}
+                          <div className="text-center px-4 py-1 min-w-[280px]">
                             <p className="text-xs font-extrabold tracking-[0.1em] text-gray-800 uppercase">{roleSignataire}</p>
                             <div className="w-16 h-[1px] bg-amber-500/60 mx-auto my-1.5" />
                             
                             {/* Espace vide prévu pour la signature et le cachet */}
-                            <div className="h-16" />
+                            <div className="h-20" />
 
                             <p className="text-sm font-extrabold text-gray-900 tracking-wide font-serif pt-1">{nomSignataire}</p>
                             <p className="text-[11px] text-gray-700 italic font-semibold tracking-wide mt-1">{titreSignataire}</p>
@@ -485,7 +486,7 @@ export default function AttestationManager() {
           })}
         </div>
       ) : (
-        <div className="print:hidden bg-white p-12 text-center rounded-2xl border border-dashed text-gray-400">
+        <div className="print:hidden bg-white p-8 sm:p-12 text-center rounded-2xl border border-dashed text-gray-400">
           <FileText size={48} className="mx-auto mb-3 opacity-40" />
           <p className="text-sm font-medium">Cochez un ou plusieurs participants dans la liste ci-dessus pour générer et exporter leurs attestations en PDF.</p>
         </div>
