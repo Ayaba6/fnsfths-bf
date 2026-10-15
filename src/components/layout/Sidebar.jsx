@@ -7,6 +7,7 @@ import {
   Building2,
   CreditCard,
   Award,
+  FileText,
   Settings,
   LogOut,
   X
@@ -84,6 +85,7 @@ export default function Sidebar({ role, onClose }) {
             <NavItem to="/admin/associations" icon={Building2} label="Associations" onClick={onClose} />
             <NavItem to="/admin/praticiens/carte" icon={CreditCard} label="Cartes FNSTHS" onClick={onClose} />
             <NavItem to="/admin/attestations" icon={Award} label="Attestations" onClick={onClose} />
+            <NavItem to="/admin/lettres" icon={FileText} label="Lettres Administratives" onClick={onClose} />
           </>
         )}
 
